@@ -602,9 +602,9 @@ function render() {
 function renderGrid() {
   const grid = document.getElementById('projects-grid');
   const projects = projectsFiltered();
+  grid.innerHTML = '';
   if (!projects.length) { grid.innerHTML = '<div class="empty-state">No projects found</div>'; return; }
 
-  // Group by series for ordering
   const order = ['Arts','Education','Cultural Work'];
   const sorted = [...projects].sort((a,b) => {
     const sa = seriesName(a), sb = seriesName(b);
@@ -613,7 +613,7 @@ function renderGrid() {
     return (a.fields['Name']||'').localeCompare(b.fields['Name']||'');
   });
 
-  grid.innerHTML = sorted.map(p => {
+  sorted.forEach(p => {
     const sn = seriesName(p);
     const name = p.fields['Name'] || '';
     const years = p.fields['Years Active'] || '';
@@ -624,27 +624,48 @@ function renderGrid() {
     const workCount = db.works.filter(w => (w.fields['Project']||[]).includes(p.id)).length;
     const isActive = activeProject && activeProject.id === p.id;
 
-    return `<div class="proj-card${isActive?' active':''}" onclick="openProject('${p.id}')">
-      <div class="proj-card-img">
-        ${img ? `<img src="${img}" loading="lazy" alt="${name}">` : `<div class="proj-card-no-img">${name}</div>`}
-      </div>
-      <div class="proj-card-body">
-        <div class="proj-card-series" data-s="${sn}">${sn}</div>
-        <div class="proj-card-title">${name}</div>
-        ${years ? `<div class="proj-card-years">${years}</div>` : ''}
-        ${desc ? `<div class="proj-card-desc">${desc}</div>` : ''}
-        <div class="proj-card-footer">
-          ${workCount ? `<span class="proj-tag has-works">${workCount} work${workCount!==1?'s':''}</span>` : ''}
-          ${grants.length ? `<span class="proj-tag has-grant">${grants[0]}</span>` : ''}
-          ${residencies.length ? `<span class="proj-tag has-residency">${residencies[0]}</span>` : ''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+    const card = document.createElement('div');
+    card.className = 'proj-card' + (isActive ? ' active' : '');
+
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'proj-card-img';
+    if (img) { const i = document.createElement('img'); i.src = img; i.loading = 'lazy'; i.alt = name; imgDiv.appendChild(i); }
+    else { const d = document.createElement('div'); d.className = 'proj-card-no-img'; d.textContent = name; imgDiv.appendChild(d); }
+    card.appendChild(imgDiv);
+
+    const body = document.createElement('div');
+    body.className = 'proj-card-body';
+
+    const seriesEl = document.createElement('div');
+    seriesEl.className = 'proj-card-series';
+    seriesEl.setAttribute('data-s', sn);
+    seriesEl.textContent = sn;
+    body.appendChild(seriesEl);
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'proj-card-title';
+    titleEl.textContent = name;
+    body.appendChild(titleEl);
+
+    if (years) { const y = document.createElement('div'); y.className = 'proj-card-years'; y.textContent = years; body.appendChild(y); }
+    if (desc) { const d = document.createElement('div'); d.className = 'proj-card-desc'; d.textContent = desc; body.appendChild(d); }
+
+    const footer = document.createElement('div');
+    footer.className = 'proj-card-footer';
+    if (workCount) { const t = document.createElement('span'); t.className = 'proj-tag has-works'; t.textContent = workCount + ' work' + (workCount!==1?'s':''); footer.appendChild(t); }
+    if (grants.length) { const t = document.createElement('span'); t.className = 'proj-tag has-grant'; t.textContent = grants[0]; footer.appendChild(t); }
+    if (residencies.length) { const t = document.createElement('span'); t.className = 'proj-tag has-residency'; t.textContent = residencies[0]; footer.appendChild(t); }
+    body.appendChild(footer);
+    card.appendChild(body);
+
+    card.addEventListener('click', (function(id){ return function(){ openProject(id); }; })(p.id));
+    grid.appendChild(card);
+  });
 }
 
 function renderList() {
   const list = document.getElementById('projects-list');
+  list.innerHTML = '';
   const projects = projectsFiltered();
   const order = ['Arts','Education','Cultural Work'];
   const byS = {};
@@ -654,21 +675,27 @@ function renderList() {
     byS[sn].push(p);
   });
 
-  list.innerHTML = order.filter(s => byS[s]).map(sn => {
-    const rows = byS[sn].sort((a,b) => (a.fields['Name']||'').localeCompare(b.fields['Name']||''));
-    return `<div class="list-section">
-      <div class="list-section-title">${sn}</div>
-      ${rows.map(p => {
-        const wc = db.works.filter(w => (w.fields['Project']||[]).includes(p.id)).length;
-        return `<div class="list-row" onclick="openProject('${p.id}')">
-          <div class="list-row-title">${p.fields['Name']||''}</div>
-          <div class="list-row-meta">${p.fields['Years Active']||'—'}</div>
-          <div class="list-row-meta">${wc ? wc+' works' : '—'}</div>
-          <div class="list-row-meta">${p.fields['Status']||'—'}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }).join('');
+  order.filter(s => byS[s]).forEach(sn => {
+    const section = document.createElement('div');
+    section.className = 'list-section';
+    const hdr = document.createElement('div');
+    hdr.className = 'list-section-title';
+    hdr.textContent = sn;
+    section.appendChild(hdr);
+
+    byS[sn].sort((a,b) => (a.fields['Name']||'').localeCompare(b.fields['Name']||'')).forEach(p => {
+      const wc = db.works.filter(w => (w.fields['Project']||[]).includes(p.id)).length;
+      const row = document.createElement('div');
+      row.className = 'list-row';
+      const t = document.createElement('div'); t.className = 'list-row-title'; t.textContent = p.fields['Name']||''; row.appendChild(t);
+      const y = document.createElement('div'); y.className = 'list-row-meta'; y.textContent = p.fields['Years Active']||'—'; row.appendChild(y);
+      const w = document.createElement('div'); w.className = 'list-row-meta'; w.textContent = wc ? wc+' works' : '—'; row.appendChild(w);
+      const s = document.createElement('div'); s.className = 'list-row-meta'; s.textContent = p.fields['Status']||'—'; row.appendChild(s);
+      row.addEventListener('click', (function(id){ return function(){ openProject(id); }; })(p.id));
+      section.appendChild(row);
+    });
+    list.appendChild(section);
+  });
 }
 
 function openProject(id) {
@@ -701,88 +728,99 @@ function openProject(id) {
 
   // Build detail body
   const body = document.getElementById('detail-body');
-  let html = '';
-
   // Works
   const works = db.works.filter(w => (w.fields['Project']||[]).includes(id));
   if (works.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-hd">Works <span class="detail-count">${works.length}</span></div>
-      ${works.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).map(w => {
-        const wf = w.fields;
-        let img = '';
-        if (wf['Images'] && wf['Images'].length) img = wf['Images'][0].thumbnails?.small?.url || wf['Images'][0].url;
-        else if (wf['Image URLs']) { const u = wf['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) img=u[0]; }
-        return `<div class="detail-work" onclick="openWork('${w.id}')">
-          <div class="detail-work-thumb">${img ? `<img src="${img}" loading="lazy">` : `<div class="detail-work-no-img">${wf['Medium Category']||'work'}</div>`}</div>
-          <div class="detail-work-info">
-            <div class="detail-work-title">${wf['Title']||''}</div>
-            <div class="detail-work-meta">${[wf['Medium Category'],wf['Year']].filter(Boolean).join(' · ')}</div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`;
+    const sec = document.createElement('div');
+    sec.className = 'detail-section';
+    const hd = document.createElement('div');
+    hd.className = 'detail-section-hd';
+    hd.innerHTML = 'Works <span class="detail-count">' + works.length + '</span>';
+    sec.appendChild(hd);
+    works.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(w => {
+      const wf = w.fields;
+      let img = '';
+      if (wf['Images'] && wf['Images'].length) img = wf['Images'][0].thumbnails && wf['Images'][0].thumbnails.small ? wf['Images'][0].thumbnails.small.url : wf['Images'][0].url;
+      else if (wf['Image URLs']) { const u = wf['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) img=u[0]; }
+      const row = document.createElement('div');
+      row.className = 'detail-work';
+      const thumb = document.createElement('div');
+      thumb.className = 'detail-work-thumb';
+      if (img) { const i = document.createElement('img'); i.src = img; i.loading = 'lazy'; thumb.appendChild(i); }
+      else { const d = document.createElement('div'); d.className = 'detail-work-no-img'; d.textContent = wf['Medium Category']||'work'; thumb.appendChild(d); }
+      const info = document.createElement('div');
+      info.className = 'detail-work-info';
+      const title = document.createElement('div'); title.className = 'detail-work-title'; title.textContent = wf['Title']||''; info.appendChild(title);
+      const meta = document.createElement('div'); meta.className = 'detail-work-meta'; meta.textContent = [wf['Medium Category'],wf['Year']].filter(Boolean).join(' · '); info.appendChild(meta);
+      row.appendChild(thumb); row.appendChild(info);
+      row.addEventListener('click', (function(wid){ return function(){ openWork(wid); }; })(w.id));
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
   }
 
   // Programs
   const progs = db.programs.filter(p => (p.fields['Project']||[]).includes(id));
   if (progs.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-hd">Programs <span class="detail-count">${progs.length}</span></div>
-      ${progs.map(p => `<div class="detail-row">
-        <div class="detail-row-label">${p.fields['Year']||''}</div>
-        <div class="detail-row-val">${p.fields['Title']||''}
-          <div class="detail-row-sub">${p.fields['Host / Venue']||''}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
+    const sec = document.createElement('div'); sec.className = 'detail-section';
+    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Programs <span class="detail-count">' + progs.length + '</span>'; sec.appendChild(hd);
+    progs.forEach(p => {
+      const row = document.createElement('div'); row.className = 'detail-row';
+      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = p.fields['Year']||''; row.appendChild(lbl);
+      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = p.fields['Title']||'';
+      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = p.fields['Host / Venue']||''; val.appendChild(sub); row.appendChild(val);
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
   }
 
   // Exhibitions
   const exhName = f['Name'] || '';
   const exhMatch = db.exhibits.filter(e => (e.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
   if (exhMatch.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-hd">Exhibitions <span class="detail-count">${exhMatch.length}</span></div>
-      ${exhMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).map(e => `<div class="detail-row">
-        <div class="detail-row-label">${e.fields['Year']||''}</div>
-        <div class="detail-row-val">${e.fields['Title']||''}
-          <div class="detail-row-sub">${e.fields['Venue']||''}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
+    const sec = document.createElement('div'); sec.className = 'detail-section';
+    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Exhibitions <span class="detail-count">' + exhMatch.length + '</span>'; sec.appendChild(hd);
+    exhMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(e => {
+      const row = document.createElement('div'); row.className = 'detail-row';
+      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = e.fields['Year']||''; row.appendChild(lbl);
+      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = e.fields['Title']||'';
+      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = e.fields['Venue']||''; val.appendChild(sub); row.appendChild(val);
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
   }
 
   // Press
   const pressMatch = db.press.filter(p => (p.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
   if (pressMatch.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-hd">Press <span class="detail-count">${pressMatch.length}</span></div>
-      ${pressMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).map(p => `<div class="detail-row">
-        <div class="detail-row-label">${p.fields['Year']||''}</div>
-        <div class="detail-row-val">${p.fields['Title']||''}
-          <div class="detail-row-sub">${p.fields['Publication']||''}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
+    const sec = document.createElement('div'); sec.className = 'detail-section';
+    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Press <span class="detail-count">' + pressMatch.length + '</span>'; sec.appendChild(hd);
+    pressMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(p => {
+      const row = document.createElement('div'); row.className = 'detail-row';
+      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = p.fields['Year']||''; row.appendChild(lbl);
+      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = p.fields['Title']||'';
+      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = p.fields['Publication']||''; val.appendChild(sub); row.appendChild(val);
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
   }
 
   // Talks
   const talksMatch = db.talks.filter(t => (t.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
   if (talksMatch.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-hd">Talks <span class="detail-count">${talksMatch.length}</span></div>
-      ${talksMatch.map(t => `<div class="detail-row">
-        <div class="detail-row-label">${t.fields['Year']||''}</div>
-        <div class="detail-row-val">${t.fields['Title']||''}
-          <div class="detail-row-sub">${t.fields['Role']||''} · ${t.fields['Host Institution']||''}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
+    const sec = document.createElement('div'); sec.className = 'detail-section';
+    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Talks <span class="detail-count">' + talksMatch.length + '</span>'; sec.appendChild(hd);
+    talksMatch.forEach(t => {
+      const row = document.createElement('div'); row.className = 'detail-row';
+      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = t.fields['Year']||''; row.appendChild(lbl);
+      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = t.fields['Title']||'';
+      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = (t.fields['Role']||'') + (t.fields['Host Institution'] ? ' · ' + t.fields['Host Institution'] : ''); val.appendChild(sub); row.appendChild(val);
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
   }
 
-  if (!html) html = '<div class="empty-state" style="padding:32px 0;">No linked records yet</div>';
-  body.innerHTML = html;
+  if (!body.children.length) body.innerHTML = '<div class="empty-state" style="padding:32px 0;">No linked records yet</div>';
   document.getElementById('detail-panel').classList.add('open');
 }
 
