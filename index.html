@@ -400,6 +400,50 @@ html, body {
 .p-list-meta { color: #666; }
 .p-list-series { color: #999; font-size: clamp(5.5px,.65vw,6.5px); margin-top: 1px; }
 
+/* selection */
+.select-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: var(--ink); color: var(--bg);
+  display: none; align-items: center;
+  padding: 12px 24px; gap: 16px;
+  font-family: var(--f-body); font-size: 12px; letter-spacing: 0.06em;
+}
+.select-bar.visible { display: flex; }
+.select-bar .sel-count { flex: 1; text-transform: uppercase; }
+.select-bar .sel-btn {
+  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3);
+  background: none; color: white; padding: 6px 16px; cursor: pointer;
+}
+.select-bar .sel-btn:hover { background: rgba(255,255,255,0.1); }
+.select-bar .sel-btn.primary { background: white; color: var(--ink); border-color: white; }
+.select-bar .sel-btn.primary:hover { background: #eee; }
+.grid-card.selected { outline: 2px solid var(--ink); outline-offset: -2px; background: var(--bg-2); }
+.grid-card.selected .grid-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(0,0,0,0.04);
+}
+.grid-img { position: relative; }
+.sel-check {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; border: 1.5px solid #ccc;
+  display: none; align-items: center; justify-content: center;
+}
+.selection-mode .sel-check { display: flex; }
+.grid-card.selected .sel-check {
+  background: var(--ink); border-color: var(--ink);
+}
+.grid-card.selected .sel-check::after {
+  content: ''; width: 5px; height: 9px;
+  border: 2px solid white; border-top: none; border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
+  display: block;
+}
+.tbl tbody tr.selected { background: var(--bg-2); outline: 1px solid var(--rule-strong); }
+.tbl tbody tr.selected td { color: var(--ink); }
+.sel-mode-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
 /* print */
 @media print {
   #shell { display: block; height: auto; }
@@ -489,6 +533,8 @@ html, body {
         <button class="view-btn active" id="vbtn-grid" onclick="setView('grid')">Grid</button>
         <div class="view-sep"></div>
         <button class="view-btn" id="vbtn-cat" onclick="setView('catalogue')">Catalogue PDF</button>
+        <button class="view-btn" id="sel-mode-btn" onclick="toggleSelectionMode()">Select</button>
+        <div class="view-sep"></div>
         <select id="sort-select" onchange="handleSort()">
           <option value="year-desc">Year: newest first</option>
           <option value="year-asc">Year: oldest first</option>
@@ -580,6 +626,12 @@ html, body {
   <div id="detail-content"></div>
 </div>
 
+<div class="select-bar" id="select-bar">
+  <span class="sel-count" id="sel-count-label">0 selected</span>
+  <button class="sel-btn" onclick="clearSelection()">Clear</button>
+  <button class="sel-btn primary" onclick="generateSelectionPDF()">Generate PDF ↗</button>
+</div>
+
 <script>
 const TOKEN = 'patl4FNtwbo43SJcy.04ce63f7c0be9f5c08ba65c6eac8d14a288d9bfabfc1c79282a85a6cf36ade3c';
 const BASE = 'appSu2cur8Ckvrrfa';
@@ -592,6 +644,8 @@ let activeFilters = { type: 'all', series: null, year: null, collect: null, prog
 let searchQ = '';
 let sortKey = 'year-desc';
 let currentView = 'table';
+let selectionMode = false;
+let selectedIds = new Set();
 let sortAscCols = {};
 
 
@@ -676,6 +730,119 @@ function updateFilterCounts() {
     const countEl = btn.querySelector('.count');
     if (countEl) countEl.textContent = count || '';
   });
+}
+
+
+// ── SELECTION ──
+function toggleSelectionMode() {
+  selectionMode = !selectionMode;
+  document.getElementById('sel-mode-btn').classList.toggle('active', selectionMode);
+  document.getElementById('grid-view').classList.toggle('selection-mode', selectionMode);
+  if (!selectionMode) clearSelection();
+  renderCurrentView();
+}
+
+function toggleSelect(id, e) {
+  if (!selectionMode) return;
+  e.stopPropagation();
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  updateSelectionBar();
+  renderCurrentView();
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  updateSelectionBar();
+  renderCurrentView();
+}
+
+function updateSelectionBar() {
+  const bar = document.getElementById('select-bar');
+  const count = selectedIds.size;
+  bar.classList.toggle('visible', count > 0);
+  document.getElementById('sel-count-label').textContent = `${count} record${count !== 1 ? 's' : ''} selected`;
+}
+
+function generateSelectionPDF() {
+  const selRecords = allRecords.filter(r => selectedIds.has(r.id));
+  const works = selRecords.filter(r => r.srcType === 'work');
+  const others = selRecords.filter(r => r.srcType !== 'work');
+
+  const bw = true;
+  const showStmt = true;
+  const showPrice = false;
+
+  const usedSeriesIds = [...new Set(works.flatMap(w => w.seriesIds))];
+  const seriesInUse = allSeries.filter(s => usedSeriesIds.includes(s.id));
+
+  const pages = [];
+  seriesInUse.forEach(series => {
+    const seriesWorks = works.filter(w => w.seriesIds.includes(series.id));
+    if (seriesWorks.length) {
+      pages.push({t:'series', series});
+      seriesWorks.forEach(w => pages.push({t:'work', w}));
+    }
+  });
+  works.filter(w => !w.seriesIds.length).forEach(w => pages.push({t:'work', w}));
+
+  if (others.length) pages.push({t:'list-mixed', records: others});
+
+  const total = pages.length;
+  const container = document.createElement('div');
+
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i];
+    const wrap = document.createElement('div');
+    wrap.className = 'cat-page-wrap';
+    let pg;
+    if (p.t === 'series') pg = catSeries(p.series);
+    else if (p.t === 'work') pg = catWork(p.w, i+1, total, bw, showStmt, showPrice);
+    else if (p.t === 'list-mixed') { catList(p.records).forEach(lp => { const lw = document.createElement('div'); lw.className='cat-page-wrap'; lw.appendChild(lp); container.appendChild(lw); }); continue; }
+    wrap.appendChild(pg);
+    container.appendChild(wrap);
+  }
+
+  const pagesHtml = container.innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(buildPrintDoc(pagesHtml));
+  win.document.close();
+  setTimeout(() => win.print(), 800);
+}
+
+function buildPrintDoc(pagesHtml) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Miguel Limón — Selected Works</title>
+  <link rel="stylesheet" href="https://use.typekit.net/rdj2lxf.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#fff;}
+    @page{size:8.5in 11in;margin:0;}
+    .cat-page{width:8.5in;height:11in;background:#fff;position:relative;overflow:hidden;page-break-after:always;break-after:page;}
+    .cat-inner{position:absolute;inset:0;padding:8% 9%;display:flex;flex-direction:column;}
+    .p-series .cat-inner{justify-content:flex-end;padding-bottom:10%;}
+    .p-series-yr{font-family:'futura-pt',sans-serif;font-size:8px;color:#bbb;margin-bottom:0.4em;}
+    .p-series-ttl{font-family:'futura-pt-condensed',sans-serif;font-size:48px;text-transform:uppercase;letter-spacing:0.03em;color:#111;line-height:1.0;margin-bottom:5%;}
+    .p-series-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 7%;}
+    .p-series-cols p{font-family:'futura-pt',sans-serif;font-size:8px;line-height:1.85;color:#444;}
+    .p-work .cat-inner{padding:5% 7%;}
+    .p-work-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3.5%;}
+    .p-work-artist{font-size:7.5px;font-style:italic;color:#111;line-height:1.4;font-family:'futura-pt',sans-serif;}
+    .p-work-sub{font-size:6px;color:#bbb;margin-top:3px;}
+    .p-work-meta{text-align:right;font-family:'futura-pt',sans-serif;font-size:7px;line-height:1.65;color:#666;}
+    .p-work-ttl{font-family:'futura-pt-condensed',sans-serif;font-style:normal;color:#111;font-size:9px;display:block;margin-bottom:1px;text-transform:uppercase;letter-spacing:0.03em;}
+    .p-work-img{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .p-work-img img{max-width:90%;max-height:90%;object-fit:contain;display:block;filter:grayscale(100%);}
+    .p-work-no-img{width:55%;aspect-ratio:4/3;background:#f0ece5;display:flex;align-items:center;justify-content:center;font-size:7px;color:#ccc;border:0.5px dashed #ddd;}
+    .p-work-stmt{margin-top:2.5%;font-size:7px;line-height:1.8;color:#666;max-width:74%;}
+    .p-list .cat-inner{padding:6% 8%;}
+    .p-list-header{font-family:'futura-pt-condensed',sans-serif;font-size:8px;text-transform:uppercase;letter-spacing:0.12em;display:grid;grid-template-columns:1fr 120px 80px 80px;gap:0 16px;border-bottom:0.5px solid #ccc;padding-bottom:6px;margin-bottom:2px;color:#999;}
+    .p-list-row{display:grid;grid-template-columns:1fr 120px 80px 80px;gap:0 16px;border-bottom:0.5px solid #eee;padding:5px 0;font-size:8px;line-height:1.4;}
+    .p-list-title{font-family:'futura-pt-condensed',sans-serif;text-transform:uppercase;letter-spacing:0.02em;color:#111;}
+    .p-list-meta{color:#666;font-family:'futura-pt',sans-serif;}
+    .p-list-series{color:#999;font-size:6.5px;margin-top:1px;font-family:'futura-pt',sans-serif;}
+    .cat-folio{position:absolute;bottom:4%;right:7%;font-size:7px;color:#bbb;letter-spacing:0.04em;font-family:'futura-pt',sans-serif;}
+  </style></head><body>${pagesHtml}</body></html>`;
 }
 
 async function fetchAll(table, filter) {
@@ -988,7 +1155,11 @@ function renderTable() {
     const price = r.listPrice ? '$' + Number(r.listPrice).toLocaleString() : '';
 
     const tr = document.createElement('tr');
-    tr.onclick = () => openDetail(r);
+    tr.onclick = (e) => {
+      if (selectionMode) toggleSelect(r.id, e);
+      else openDetail(r);
+    };
+    if (selectedIds.has(r.id)) tr.classList.add('selected');
     tr.innerHTML = `
       <td class="td-thumb">${img ? `<img src="${img}" loading="lazy">` : '<div class="no-thumb"></div>'}</td>
       <td class="td-title">${r.title}</td>
@@ -1012,9 +1183,13 @@ function renderGrid() {
     const sub = sName || r.org || r.category || '';
     const card = document.createElement('div');
     card.className = 'grid-card';
-    card.onclick = () => openDetail(r);
+    card.onclick = (e) => {
+      if (selectionMode) toggleSelect(r.id, e);
+      else openDetail(r);
+    };
+    if (selectedIds.has(r.id)) card.classList.add('selected');
     card.innerHTML = `
-      <div class="grid-img">${img ? `<img src="${img}" loading="lazy">` : `<div class="grid-no-img">${typeLabel(r)}</div>`}</div>
+      <div class="grid-img">${img ? `<img src="${img}" loading="lazy">` : `<div class="grid-no-img">${typeLabel(r)}</div>`}<div class="sel-check"></div></div>
       <div class="grid-body">
         <div class="grid-type">${typeLabel(r)}${sub ? ' · ' + sub : ''}</div>
         <div class="grid-title">${r.title}</div>
