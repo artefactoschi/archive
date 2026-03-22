@@ -9,1021 +9,881 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --ink: #1d1d1d;
-  --ink-2: #555;
-  --ink-3: #999;
-  --ink-4: #ccc;
-  --bg: #fafafa;
-  --bg-2: #f2f0eb;
-  --bg-3: #e8e5de;
-  --white: #ffffff;
+  --black: #0a0a0a;
+  --white: #f5f4f0;
+  --gray-1: #1a1a1a;
+  --gray-2: #333;
+  --gray-3: #666;
+  --gray-4: #999;
+  --gray-5: #ccc;
+  --gray-6: #e8e6e0;
+  --gray-7: #f0ede6;
   --accent: #d1551f;
-  --rule: rgba(0,0,0,0.08);
-  --rule-strong: rgba(0,0,0,0.15);
-  --f-body: 'futura-pt', sans-serif;
+  --arts: #c94a00;
+  --edu: #1a4080;
+  --cw: #2a6040;
+  --bar-h: 40px;
+  --panel-w: 52vw;
   --f-cond: 'futura-pt-condensed', sans-serif;
-  --nav-h: 48px;
+  --f-body: 'futura-pt', sans-serif;
 }
 
-html, body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--f-body);
-  font-size: 13px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  height: 100%;
-}
-
-/* ── SHELL ── */
-#shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+html, body { background: var(--white); color: var(--black); font-family: var(--f-body); font-size: 12px; line-height: 1.4; -webkit-font-smoothing: antialiased; height: 100%; }
 
 /* ── TOPBAR ── */
 #topbar {
-  height: var(--nav-h);
-  background: var(--white);
-  border-bottom: 1px solid var(--rule-strong);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: var(--bar-h);
+  background: var(--black);
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: stretch;
+  border-bottom: 1px solid var(--gray-2);
+}
+.bar-title {
+  font-family: var(--f-cond); font-size: 11px; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--white);
+  display: flex; align-items: center; padding: 0 16px;
+  border-right: 1px solid var(--gray-2);
+}
+.bar-nav { display: flex; align-items: stretch; }
+.bar-tab {
+  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray-4);
+  padding: 0 16px; border: none; background: none; cursor: pointer;
+  border-right: 1px solid var(--gray-2); transition: color 0.1s, background 0.1s;
   display: flex; align-items: center;
-  padding: 0 24px;
-  gap: 20px;
-  flex-shrink: 0;
-  z-index: 100;
 }
-.top-title {
-  font-family: var(--f-cond);
-  font-size: 15px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  flex-shrink: 0;
+.bar-tab:hover { color: var(--white); background: var(--gray-1); }
+.bar-tab.active { color: var(--white); }
+.bar-tab.active[data-s="Arts"] { border-bottom: 2px solid var(--arts); }
+.bar-tab.active[data-s="Education"] { border-bottom: 2px solid var(--edu); }
+.bar-tab.active[data-s="Cultural Work"] { border-bottom: 2px solid var(--cw); }
+.bar-right { display: flex; align-items: stretch; gap: 0; }
+.bar-btn {
+  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gray-4);
+  padding: 0 14px; border: none; border-left: 1px solid var(--gray-2);
+  background: none; cursor: pointer; transition: color 0.1s, background 0.1s;
+  display: flex; align-items: center; white-space: nowrap;
 }
-.top-sep { width: 1px; height: 16px; background: var(--rule-strong); flex-shrink: 0; }
-.series-tabs { display: flex; gap: 2px; flex: 1; }
-.series-tab {
-  font-family: var(--f-body);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border: none;
-  background: none;
-  color: var(--ink-3);
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
+.bar-btn:hover { color: var(--white); background: var(--gray-1); }
+.bar-btn.active { color: var(--white); background: var(--gray-1); }
+.bar-btn.accent { color: var(--accent); }
+.bar-btn.accent:hover { background: var(--accent); color: var(--white); }
+#search-input {
+  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.08em;
+  background: none; border: none; border-left: 1px solid var(--gray-2);
+  color: var(--white); padding: 0 14px; width: 160px; outline: none;
 }
-.series-tab:hover { color: var(--ink); background: var(--bg-2); }
-.series-tab.active { color: var(--ink); background: var(--bg-2); }
-.series-tab.active[data-series="Arts"] { background: #f0ece5; color: var(--ink); }
-.series-tab.active[data-series="Education"] { background: #e8edf5; color: #1a3060; }
-.series-tab.active[data-series="Cultural Work"] { background: #f5ebe8; color: #6b2200; }
-.top-search {
-  font-family: var(--f-body);
-  font-size: 12px;
-  padding: 5px 10px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 3px;
-  background: var(--bg);
-  color: var(--ink);
-  width: 160px;
-  outline: none;
-}
-.top-search:focus { border-color: var(--ink-3); }
-.view-toggle { display: flex; gap: 2px; }
-.view-btn {
-  font-size: 11px; font-family: var(--f-body);
-  letter-spacing: 0.06em; text-transform: uppercase;
-  padding: 4px 10px; border: 1px solid var(--rule-strong);
-  background: none; color: var(--ink-3); cursor: pointer;
-  transition: all 0.12s;
-}
-.view-btn:first-child { border-radius: 3px 0 0 3px; }
-.view-btn:last-child { border-radius: 0 3px 3px 0; margin-left: -1px; }
-.view-btn.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+#search-input::placeholder { color: var(--gray-4); }
 
 /* ── MAIN ── */
-#main { flex: 1; overflow: hidden; display: flex; }
+#main { padding-top: var(--bar-h); height: 100vh; display: flex; overflow: hidden; }
 
-/* ── PROJECTS PANEL ── */
-#projects-panel {
-  flex: 1;
-  overflow-y: auto;
-  padding: 28px 28px 80px;
+/* ── GRID PANEL ── */
+#grid-panel { flex: 1; overflow-y: auto; padding: 0; }
+#grid-panel::-webkit-scrollbar { width: 3px; }
+#grid-panel::-webkit-scrollbar-thumb { background: var(--gray-5); }
+
+/* ── SERIES DIVIDER ── */
+.series-divider {
+  display: flex; align-items: center;
+  padding: 20px 20px 10px;
+  gap: 12px;
 }
+.series-divider-label {
+  font-family: var(--f-cond); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gray-4); flex-shrink: 0;
+}
+.series-divider-line { flex: 1; height: 1px; background: var(--gray-6); }
+.series-divider-count { font-size: 10px; color: var(--gray-5); letter-spacing: 0.06em; flex-shrink: 0; }
 
 /* ── PROJECT GRID ── */
-#projects-grid {
+.proj-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--gray-6);
+  margin: 0 20px 20px;
+  border: 1px solid var(--gray-6);
 }
 
-/* ── PROJECT CARD ── */
 .proj-card {
   background: var(--white);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
   cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  transition: background 0.1s;
+  display: flex; flex-direction: column;
 }
-.proj-card:hover { border-color: var(--rule-strong); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-.proj-card.active { border-color: var(--ink); }
+.proj-card:hover { background: var(--gray-7); }
+.proj-card.active { background: var(--black); }
+.proj-card.selected { background: var(--gray-7); outline: 2px solid var(--black); outline-offset: -2px; }
 
 .proj-card-img {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: var(--bg-2);
-  overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 100%; aspect-ratio: 3/2;
+  background: var(--gray-6); overflow: hidden;
+  position: relative;
 }
-.proj-card-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
+.proj-card-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(15%); transition: filter 0.2s; }
+.proj-card:hover .proj-card-img img { filter: grayscale(0%); }
+.proj-card.active .proj-card-img img { filter: grayscale(100%); }
 .proj-card-no-img {
-  font-family: var(--f-cond);
-  font-size: 28px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bg-3);
-  text-align: center;
-  padding: 16px;
-  line-height: 1.1;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-cond); font-size: 22px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--gray-5); text-align: center; padding: 12px;
 }
 
-.proj-card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.proj-card-series {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+/* Selection checkbox */
+.proj-check {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 18px; height: 18px; border: 1.5px solid var(--gray-4);
+  background: rgba(245,244,240,0.9);
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer;
 }
-.proj-card-series[data-s="Arts"] { color: #b0450a; }
-.proj-card-series[data-s="Education"] { color: #1a4a8a; }
-.proj-card-series[data-s="Cultural Work"] { color: #6b3300; }
+.select-mode .proj-check { display: flex; }
+.proj-card.selected .proj-check { background: var(--black); border-color: var(--black); }
+.proj-card.selected .proj-check::after {
+  content: ''; width: 4px; height: 7px;
+  border: 1.5px solid var(--white); border-top: none; border-left: none;
+  transform: rotate(45deg) translate(-1px,-1px); display: block;
+}
+
+.proj-card-body { padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.proj-card-series {
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.proj-card-series[data-s="Arts"] { color: var(--arts); }
+.proj-card-series[data-s="Education"] { color: var(--edu); }
+.proj-card-series[data-s="Cultural Work"] { color: var(--cw); }
+.proj-card.active .proj-card-series { color: var(--gray-4); }
 
 .proj-card-title {
-  font-family: var(--f-cond);
-  font-size: 17px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--ink);
-  line-height: 1.1;
+  font-family: var(--f-cond); font-size: 15px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--black); line-height: 1.1;
 }
-.proj-card-years { font-size: 11px; color: var(--ink-3); }
-.proj-card-desc {
-  font-size: 11px;
-  color: var(--ink-2);
-  line-height: 1.6;
-  margin-top: 2px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
-}
-.proj-card-footer {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
+.proj-card.active .proj-card-title { color: var(--white); }
+
+.proj-card-years { font-size: 10px; color: var(--gray-4); }
+.proj-card.active .proj-card-years { color: var(--gray-4); }
+
+.proj-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
 .proj-tag {
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 2px;
-  background: var(--bg-2);
-  color: var(--ink-3);
+  font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 5px; border: 1px solid var(--gray-5); color: var(--gray-4);
 }
-.proj-tag.has-works { background: #f0f0ea; color: #555; }
-.proj-tag.has-grant { background: #f5ebe8; color: #6b2200; }
-.proj-tag.has-residency { background: #e8edf5; color: #1a3060; }
+.proj-tag.t-work { border-color: var(--gray-4); color: var(--gray-3); }
+.proj-tag.t-grant { border-color: #c94a0066; color: var(--arts); }
+.proj-tag.t-res { border-color: #1a408066; color: var(--edu); }
+.proj-card.active .proj-tag { border-color: var(--gray-2); color: var(--gray-4); }
 
 /* ── LIST VIEW ── */
-#projects-list { display: none; }
-#projects-list.visible { display: block; }
-#projects-grid.hidden { display: none; }
+#list-view { display: none; }
+#list-view.vis { display: block; }
+#grid-view.hidden { display: none; }
 
-.list-section { margin-bottom: 32px; }
-.list-section-title {
-  font-family: var(--f-cond);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  padding: 0 0 8px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 4px;
+.list-section { margin: 0 20px 24px; }
+.list-hd {
+  font-family: var(--f-cond); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gray-4);
+  padding: 16px 0 6px; border-bottom: 1px solid var(--gray-6);
+  display: grid; grid-template-columns: 1fr 90px 70px 80px; gap: 0 12px;
 }
 .list-row {
-  display: grid;
-  grid-template-columns: 1fr 100px 80px 120px;
-  gap: 0 16px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--rule);
-  cursor: pointer;
-  transition: background 0.1s;
-  align-items: baseline;
+  display: grid; grid-template-columns: 1fr 90px 70px 80px; gap: 0 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--gray-6);
+  cursor: pointer; align-items: baseline; transition: background 0.1s;
 }
-.list-row:hover { background: var(--bg-2); margin: 0 -8px; padding: 8px 8px; }
-.list-row-title {
-  font-family: var(--f-cond);
-  font-size: 14px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-.list-row-meta { font-size: 11px; color: var(--ink-3); }
+.list-row:hover { background: var(--gray-7); margin: 0 -8px; padding: 7px 8px; }
+.list-row.active { background: var(--black); margin: 0 -8px; padding: 7px 8px; }
+.list-title { font-family: var(--f-cond); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+.list-row.active .list-title { color: var(--white); }
+.list-meta { font-size: 10px; color: var(--gray-4); }
+.list-row.active .list-meta { color: var(--gray-4); }
 
 /* ── DETAIL PANEL ── */
 #detail-panel {
-  width: 0;
-  overflow: hidden;
-  transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
-  border-left: 1px solid var(--rule-strong);
+  width: 0; flex-shrink: 0; overflow: hidden;
+  transition: width 0.22s cubic-bezier(0.4,0,0.2,1);
+  border-left: 1px solid var(--gray-6);
   background: var(--white);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
+  display: flex; flex-direction: column;
 }
-#detail-panel.open { width: 420px; }
+#detail-panel.open { width: var(--panel-w); }
 
-#detail-header {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--rule);
-  flex-shrink: 0;
+#detail-top {
+  background: var(--black); padding: 20px 28px 20px;
+  flex-shrink: 0; position: relative;
 }
-.detail-close {
-  float: right;
-  background: none; border: none;
-  font-size: 18px; cursor: pointer;
-  color: var(--ink-3); padding: 0; margin: 0 0 0 8px;
-  line-height: 1;
+.d-close {
+  position: absolute; top: 14px; right: 16px;
+  font-size: 20px; color: var(--gray-3); background: none; border: none; cursor: pointer;
+  line-height: 1; padding: 4px; transition: color 0.1s;
 }
-.detail-close:hover { color: var(--ink); }
-.detail-series {
-  font-size: 10px; letter-spacing: 0.12em;
-  text-transform: uppercase; margin-bottom: 5px;
+.d-close:hover { color: var(--white); }
+.d-series { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+.d-series[data-s="Arts"] { color: var(--arts); }
+.d-series[data-s="Education"] { color: #5580c0; }
+.d-series[data-s="Cultural Work"] { color: #5aa080; }
+.d-title {
+  font-family: var(--f-cond); font-size: 28px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--white); line-height: 1.0; margin-bottom: 6px;
 }
-.detail-series[data-s="Arts"] { color: #b0450a; }
-.detail-series[data-s="Education"] { color: #1a4a8a; }
-.detail-series[data-s="Cultural Work"] { color: #6b3300; }
-.detail-title {
-  font-family: var(--f-cond);
-  font-size: 22px; letter-spacing: 0.04em;
-  text-transform: uppercase; line-height: 1.1;
-  color: var(--ink);
-}
-.detail-years { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
-.detail-desc { font-size: 12px; color: var(--ink-2); line-height: 1.7; margin-top: 10px; }
-
-.detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-.detail-tag {
-  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 2px;
-}
-.detail-tag-grant { background: #f5ebe8; color: #6b2200; }
-.detail-tag-residency { background: #e8edf5; color: #1a3060; }
+.d-years { font-size: 10px; color: var(--gray-4); margin-bottom: 10px; }
+.d-desc { font-size: 11px; color: #888; line-height: 1.7; max-width: 520px; }
+.d-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.d-tag { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid; }
+.d-tag-grant { border-color: #c94a0055; color: #e07050; }
+.d-tag-res { border-color: #1a408055; color: #6090c0; }
 
 #detail-body { flex: 1; overflow-y: auto; }
+#detail-body::-webkit-scrollbar { width: 3px; }
+#detail-body::-webkit-scrollbar-thumb { background: var(--gray-5); }
 
-.detail-section { border-top: 1px solid var(--rule); }
-.detail-section-hd {
-  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-3); padding: 12px 24px 8px;
-  display: flex; justify-content: space-between; align-items: center;
+/* Detail sections */
+.d-section { border-top: 1px solid var(--gray-6); }
+.d-section-hd {
+  font-family: var(--f-cond); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gray-4);
+  padding: 12px 28px 8px; display: flex; justify-content: space-between;
 }
-.detail-count { font-size: 10px; color: var(--ink-4); }
+.d-count { color: var(--gray-5); }
 
-.detail-work {
-  display: flex; gap: 12px; padding: 8px 24px;
-  border-top: 1px solid var(--rule); cursor: pointer;
+/* Works in detail - grid layout */
+.d-works-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--gray-6); margin: 0 28px 16px;
+}
+.d-work {
+  background: var(--white); cursor: pointer;
+  transition: background 0.1s; padding: 0;
+}
+.d-work:hover { background: var(--gray-7); }
+.d-work-img { width: 100%; aspect-ratio: 4/3; background: var(--gray-6); overflow: hidden; }
+.d-work-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); transition: filter 0.15s; }
+.d-work:hover .d-work-img img { filter: grayscale(0%); }
+.d-work-info { padding: 7px 10px 9px; }
+.d-work-title { font-family: var(--f-cond); font-size: 11px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--black); line-height: 1.2; }
+.d-work-meta { font-size: 9px; color: var(--gray-4); margin-top: 2px; }
+
+/* List rows in detail */
+.d-row {
+  display: grid; grid-template-columns: 64px 1fr; gap: 0 16px;
+  padding: 8px 28px; border-top: 1px solid var(--gray-6);
   transition: background 0.1s;
 }
-.detail-work:hover { background: var(--bg-2); }
-.detail-work-thumb {
-  width: 52px; height: 42px; background: var(--bg-2);
-  border-radius: 2px; overflow: hidden; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-.detail-work-thumb img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
-.detail-work-no-img { font-size: 8px; color: var(--ink-4); text-align: center; padding: 4px; }
-.detail-work-info { flex: 1; min-width: 0; }
-.detail-work-title {
-  font-family: var(--f-cond);
-  font-size: 12px; letter-spacing: 0.03em; text-transform: uppercase;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.detail-work-meta { font-size: 10px; color: var(--ink-3); margin-top: 2px; }
+.d-row:hover { background: var(--gray-7); }
+.d-row-yr { font-size: 10px; color: var(--gray-4); padding-top: 1px; }
+.d-row-val { font-size: 11px; color: var(--black); line-height: 1.4; }
+.d-row-sub { font-size: 10px; color: var(--gray-4); margin-top: 2px; }
 
-.detail-row {
-  padding: 7px 24px;
-  border-top: 1px solid var(--rule);
-  display: grid; grid-template-columns: 90px 1fr;
-  gap: 8px; align-items: start;
+/* ── LIGHTBOX ── */
+#lightbox {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(10,10,10,0.88); align-items: center; justify-content: center;
 }
-.detail-row:hover { background: var(--bg-2); }
-.detail-row-label { font-size: 10px; color: var(--ink-3); padding-top: 1px; }
-.detail-row-val { font-size: 12px; color: var(--ink); line-height: 1.5; }
-.detail-row-sub { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+#lightbox.open { display: flex; }
+#lb-inner {
+  background: var(--white); width: 640px; max-width: 92vw;
+  max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+}
+#lb-header {
+  padding: 14px 20px; border-bottom: 1px solid var(--gray-6);
+  display: flex; align-items: flex-start; background: var(--black);
+}
+#lb-close { margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-4); padding: 0 0 0 12px; }
+.lb-title { font-family: var(--f-cond); font-size: 16px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--white); }
+.lb-meta { font-size: 10px; color: var(--gray-4); margin-top: 3px; }
+#lb-img { width: 100%; max-height: 420px; object-fit: contain; background: var(--gray-7); display: block; }
+#lb-body { padding: 16px 20px; }
+.lb-row { padding: 6px 0; border-bottom: 1px solid var(--gray-6); display: grid; grid-template-columns: 100px 1fr; gap: 0 12px; }
+.lb-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-4); padding-top: 2px; }
+.lb-val { font-size: 11px; color: var(--black); line-height: 1.6; }
+
+/* ── SELECTION BAR ── */
+#sel-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: var(--black); border-top: 1px solid var(--gray-2);
+  display: none; align-items: center; padding: 0 20px; height: 40px; gap: 16px;
+}
+#sel-bar.vis { display: flex; }
+#sel-count { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-4); flex: 1; }
+.sel-action {
+  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; background: none; border: 1px solid var(--gray-2);
+  color: var(--gray-4); padding: 5px 14px; cursor: pointer; transition: all 0.1s;
+}
+.sel-action:hover { border-color: var(--gray-4); color: var(--white); }
+.sel-action.primary { border-color: var(--accent); color: var(--accent); }
+.sel-action.primary:hover { background: var(--accent); color: var(--white); }
+
+/* ── PDF PANEL ── */
+#pdf-panel {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: rgba(10,10,10,0.8); align-items: center; justify-content: center;
+}
+#pdf-panel.open { display: flex; }
+#pdf-inner { background: var(--white); width: 320px; }
+#pdf-header {
+  background: var(--black); padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pdf-title { font-family: var(--f-cond); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--white); }
+#pdf-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gray-4); padding: 0; }
+#pdf-body { padding: 16px; }
+.pdf-group-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-4); margin-bottom: 7px; }
+.pdf-option { display: flex; gap: 8px; align-items: center; margin-bottom: 5px; font-size: 11px; color: var(--black); cursor: pointer; }
+.pdf-option input { accent-color: var(--black); }
+.pdf-select {
+  width: 100%; padding: 6px 8px; border: 1px solid var(--gray-5);
+  background: var(--white); font-family: var(--f-body); font-size: 11px;
+  color: var(--black); margin-top: 2px; margin-bottom: 14px; outline: none;
+  appearance: none; cursor: pointer;
+}
+.pdf-submit {
+  width: 100%; padding: 9px; background: var(--black); color: var(--white);
+  border: none; font-family: var(--f-body); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.1s;
+}
+.pdf-submit:hover { background: var(--gray-1); }
 
 /* ── LOADING ── */
 #loading {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 999;
-  flex-direction: column; gap: 16px;
+  position: fixed; inset: 0; background: var(--black); z-index: 999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
 }
-.loading-title {
-  font-family: var(--f-cond);
-  font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink);
-}
-.loading-bar-wrap { width: 160px; height: 1px; background: var(--rule-strong); }
-.loading-bar { height: 1px; background: var(--ink); width: 0%; transition: width 0.3s; }
-
-/* ── EMPTY ── */
-.empty-state {
-  padding: 60px 0; text-align: center;
-  font-size: 12px; color: var(--ink-3);
-  letter-spacing: 0.08em; text-transform: uppercase;
-}
-
-/* ── WORK LIGHTBOX ── */
-#lightbox {
-  display: none;
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(29,29,29,0.92);
-  align-items: center; justify-content: center;
-}
-#lightbox.open { display: flex; }
-#lightbox-inner {
-  background: var(--white);
-  max-width: 720px; width: 90%;
-  max-height: 88vh;
-  overflow-y: auto;
-  border-radius: 2px;
-}
-#lightbox-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--rule);
-  display: flex; align-items: flex-start;
-}
-#lightbox-close {
-  margin-left: auto; background: none; border: none;
-  font-size: 20px; cursor: pointer; color: var(--ink-3);
-  flex-shrink: 0; padding: 0;
-}
-.lb-title {
-  font-family: var(--f-cond); font-size: 18px;
-  letter-spacing: 0.04em; text-transform: uppercase;
-}
-.lb-meta { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
-#lightbox-img {
-  width: 100%; max-height: 380px; object-fit: contain;
-  background: var(--bg-2); display: block;
-}
-#lightbox-body { padding: 16px 20px; }
-.lb-field { margin-bottom: 12px; }
-.lb-field-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px; }
-.lb-field-val { font-size: 12px; color: var(--ink-2); line-height: 1.7; }
-
-
-/* ── PDF CATALOGUE ── */
-@media print {
-  #shell, #loading, #lightbox, .select-bar { display: none !important; }
-}
-.cat-page-wrap { display: none; }
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 2px; }
-
-/* ── SELECTION BAR ── */
-.select-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: var(--ink); color: var(--white);
-  display: none; align-items: center;
-  padding: 10px 24px; gap: 16px;
-  font-size: 11px; letter-spacing: 0.06em;
-}
-.select-bar.visible { display: flex; }
-.sel-count { flex: 1; text-transform: uppercase; }
-.sel-btn {
-  font-family: var(--f-body); font-size: 10px; letter-spacing: 0.1em;
-  text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3);
-  background: none; color: white; padding: 5px 14px; cursor: pointer;
-}
-.sel-btn.primary { background: white; color: var(--ink); border-color: white; }
+.load-title { font-family: var(--f-cond); font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); }
+.load-track { width: 200px; height: 1px; background: var(--gray-2); }
+.load-fill { height: 1px; background: var(--white); width: 0%; transition: width 0.3s; }
+.load-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-4); }
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <div class="loading-title">Archive — Miguel Limón</div>
-  <div class="loading-bar-wrap"><div class="loading-bar" id="load-bar"></div></div>
+  <div class="load-title">Miguel Limón — Archive</div>
+  <div class="load-track"><div class="load-fill" id="load-fill"></div></div>
+  <div class="load-label" id="load-label">Loading</div>
 </div>
 
-<div id="shell">
-  <div id="topbar">
-    <div class="top-title">Archive</div>
-    <div class="top-sep"></div>
-    <div class="series-tabs">
-      <button class="series-tab active" data-series="all" onclick="filterSeries('all',this)">All</button>
-      <button class="series-tab" data-series="Arts" onclick="filterSeries('Arts',this)">Arts</button>
-      <button class="series-tab" data-series="Education" onclick="filterSeries('Education',this)">Education</button>
-      <button class="series-tab" data-series="Cultural Work" onclick="filterSeries('Cultural Work',this)">Cultural Work</button>
-    </div>
-    <input type="search" class="top-search" id="search-input" placeholder="Search..." oninput="handleSearch()">
-    <div class="view-toggle">
-      <button class="view-btn active" id="vbtn-grid" onclick="setView('grid')">Grid</button>
-      <button class="view-btn" id="vbtn-list" onclick="setView('list')">List</button>
-    </div>
+<div id="topbar">
+  <div class="bar-title">Archive / ML</div>
+  <div class="bar-nav" id="bar-nav">
+    <button class="bar-tab active" data-s="all" onclick="filterSeries('all',this)">All</button>
+    <button class="bar-tab" data-s="Arts" onclick="filterSeries('Arts',this)">Arts</button>
+    <button class="bar-tab" data-s="Education" onclick="filterSeries('Education',this)">Education</button>
+    <button class="bar-tab" data-s="Cultural Work" onclick="filterSeries('Cultural Work',this)">Cultural Work</button>
   </div>
-
-  <div id="main">
-    <div id="projects-panel">
-      <div id="projects-grid"></div>
-      <div id="projects-list"></div>
-    </div>
-    <div id="detail-panel">
-      <div id="detail-header">
-        <button class="detail-close" onclick="closeDetail()">×</button>
-        <div class="detail-series" id="d-series"></div>
-        <div class="detail-title" id="d-title"></div>
-        <div class="detail-years" id="d-years"></div>
-        <div class="detail-desc" id="d-desc"></div>
-        <div class="detail-tags" id="d-tags"></div>
-      </div>
-      <div id="detail-body"></div>
-    </div>
+  <div class="bar-right">
+    <input id="search-input" type="search" placeholder="Search..." oninput="handleSearch()">
+    <button class="bar-btn" id="vbtn-grid" onclick="setView('grid')">Grid</button>
+    <button class="bar-btn" id="vbtn-list" onclick="setView('list')">List</button>
+    <button class="bar-btn" id="sel-btn" onclick="toggleSelect()">Select</button>
+    <button class="bar-btn accent" onclick="openPDF()">PDF ↗</button>
   </div>
 </div>
 
+<div id="main">
+  <div id="grid-panel">
+    <div id="grid-view"></div>
+    <div id="list-view"></div>
+  </div>
+  <div id="detail-panel">
+    <div id="detail-top">
+      <button class="d-close" onclick="closeDetail()">×</button>
+      <div class="d-series" id="d-series"></div>
+      <div class="d-title" id="d-title"></div>
+      <div class="d-years" id="d-years"></div>
+      <div class="d-desc" id="d-desc"></div>
+      <div class="d-tags" id="d-tags"></div>
+    </div>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <div id="lb-inner">
+    <div id="lb-header">
+      <div><div class="lb-title" id="lb-title"></div><div class="lb-meta" id="lb-meta"></div></div>
+      <button id="lb-close" onclick="closeLB()">×</button>
+    </div>
+    <img id="lb-img" src="" alt="" style="display:none">
+    <div id="lb-body"></div>
+  </div>
+</div>
+
+<!-- SELECTION BAR -->
+<div id="sel-bar">
+  <span id="sel-count">0 selected</span>
+  <button class="sel-action" onclick="clearSel()">Clear</button>
+  <button class="sel-action primary" onclick="openPDFSel()">Export PDF ↗</button>
+</div>
 
 <!-- PDF PANEL -->
-<div id="pdf-panel" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(29,29,29,0.7);align-items:center;justify-content:center;">
-  <div style="background:var(--white);width:340px;border-radius:4px;overflow:hidden;">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-family:var(--f-cond);font-size:15px;letter-spacing:0.06em;text-transform:uppercase;">Export PDF</div>
-      <button onclick="closePDFPanel()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);padding:0;">×</button>
+<div id="pdf-panel">
+  <div id="pdf-inner">
+    <div id="pdf-header">
+      <span class="pdf-title">Export PDF</span>
+      <button id="pdf-close" onclick="closePDF()">×</button>
     </div>
-    <div style="padding:16px 20px;">
-      <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Source</div>
-      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;cursor:pointer;">
-        <input type="radio" name="pdf-src" value="all" checked> All works
-      </label>
-      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;cursor:pointer;">
-        <input type="radio" name="pdf-src" value="project"> Current project
-      </label>
-      <label style="display:flex;gap:8px;align-items:center;margin-bottom:16px;font-size:12px;cursor:pointer;">
-        <input type="radio" name="pdf-src" value="selected"> Selected works (<span id="pdf-sel-count">0</span>)
-      </label>
-      <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Layout</div>
-      <select id="pdf-layout" style="width:100%;margin-bottom:16px;padding:6px 8px;border:1px solid var(--rule-strong);border-radius:3px;background:var(--bg);font-family:var(--f-body);font-size:12px;">
-        <option value="works-only">Works only</option>
-        <option value="list">Checklist / list</option>
+    <div id="pdf-body">
+      <div class="pdf-group-label">Source</div>
+      <label class="pdf-option"><input type="radio" name="pdf-src" value="all" checked> All works</label>
+      <label class="pdf-option"><input type="radio" name="pdf-src" value="project"> Current project (<span id="pdf-proj-name">none</span>)</label>
+      <label class="pdf-option" style="margin-bottom:14px"><input type="radio" name="pdf-src" value="selected"> Selected (<span id="pdf-sel-n">0</span>)</label>
+      <div class="pdf-group-label">Layout</div>
+      <select class="pdf-select" id="pdf-layout">
+        <option value="works">Works pages</option>
+        <option value="list">Checklist</option>
       </select>
-      <button onclick="runPDFExport()" style="width:100%;padding:9px;background:var(--ink);color:white;border:none;border-radius:3px;font-family:var(--f-body);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Generate PDF ↗</button>
+      <button class="pdf-submit" onclick="runPDF()">Generate PDF ↗</button>
     </div>
   </div>
-</div>
-
-<div id="lightbox">
-  <div id="lightbox-inner">
-    <div id="lightbox-header">
-      <div>
-        <div class="lb-title" id="lb-title"></div>
-        <div class="lb-meta" id="lb-meta"></div>
-      </div>
-      <button id="lightbox-close" onclick="closeLightbox()">×</button>
-    </div>
-    <img id="lightbox-img" src="" alt="" style="display:none">
-    <div id="lightbox-body"></div>
-  </div>
-</div>
-
-<div class="select-bar" id="select-bar">
-  <span class="sel-count" id="sel-count-label">0 selected</span>
-  <button class="sel-btn" onclick="clearSelection()">Clear</button>
-  <button class="sel-btn primary" onclick="generatePDF()">Export PDF ↗</button>
 </div>
 
 <script>
 const TOKEN = 'patl4FNtwbo43SJcy.04ce63f7c0be9f5c08ba65c6eac8d14a288d9bfabfc1c79282a85a6cf36ade3c';
 const BASE  = 'appSu2cur8Ckvrrfa';
-const TABLES = {
-  series:    'tblvc9YOX73uPXAZg',
-  projects:  'tblfS8r1tEL3cvyET',
-  works:     'tbl0KrbmkmEF4Wlwj',
-  programs:  'tblBDj0U9cAqqoMX0',
-  exhibits:  'tblFB3ynASe58cPHp',
-  press:     'tbl9HY3XjaRXmtqqc',
-  talks:     'tblvsxhmzH72MuYfi',
-  grants:    'tblO9e5eYALK5Dcku',
-  commissions:'tblrxnqljqCp0lp2V',
+const TBL = {
+  series:   'tblvc9YOX73uPXAZg',
+  projects: 'tblfS8r1tEL3cvyET',
+  works:    'tbl0KrbmkmEF4Wlwj',
+  programs: 'tblBDj0U9cAqqoMX0',
+  exhibits: 'tblFB3ynASe58cPHp',
+  press:    'tbl9HY3XjaRXmtqqc',
+  talks:    'tblvsxhmzH72MuYfi',
+  grants:   'tblO9e5eYALK5Dcku',
 };
 
 let db = {};
 let activeSeries = 'all';
 let activeProject = null;
 let searchQ = '';
-let currentView = 'grid';
-let selectedIds = new Set();
+let view = 'grid';
+let selMode = false;
+let selIds = new Set();
 
-async function fetchAll(table) {
-  let records = [], offset = null;
+async function fetchAll(tid) {
+  let recs = [], offset;
   do {
-    const url = `https://api.airtable.com/v0/${BASE}/${table}?pageSize=100${offset ? '&offset='+offset : ''}`;
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` } });
-    const d = await r.json();
-    records = records.concat(d.records || []);
+    const url = `https://api.airtable.com/v0/${BASE}/${tid}?pageSize=100${offset?'&offset='+offset:''}`;
+    const d = await (await fetch(url,{headers:{Authorization:`Bearer ${TOKEN}`}})).json();
+    recs = recs.concat(d.records||[]);
     offset = d.offset;
   } while (offset);
-  return records;
+  return recs;
 }
 
 async function init() {
-  const bar = document.getElementById('load-bar');
-  const tables = Object.entries(TABLES);
-  let loaded = 0;
-  const results = await Promise.all(tables.map(async ([key, tid]) => {
-    const recs = await fetchAll(tid);
-    loaded++;
-    bar.style.width = (loaded / tables.length * 100) + '%';
-    return [key, recs];
+  const fill = document.getElementById('load-fill');
+  const lbl = document.getElementById('load-label');
+  const entries = Object.entries(TBL);
+  let n = 0;
+  await Promise.all(entries.map(async ([k,tid]) => {
+    db[k] = await fetchAll(tid);
+    n++; fill.style.width = (n/entries.length*100)+'%';
+    lbl.textContent = k;
   }));
-  results.forEach(([key, recs]) => db[key] = recs);
   document.getElementById('loading').style.display = 'none';
   render();
 }
 
-function seriesName(proj) {
-  const sids = proj.fields['Series'] || [];
-  if (!sids.length) return '';
-  const s = db.series.find(x => x.id === sids[0]);
-  return s ? s.fields['Name'] || '' : '';
+function sName(proj) {
+  const sid = (proj.fields['Series']||[])[0];
+  if (!sid) return '';
+  const s = db.series.find(x => x.id === sid);
+  return s ? s.fields['Name']||'' : '';
 }
 
-function projectsFiltered() {
+function projImg(p) {
+  for (const w of db.works.filter(w => (w.fields['Project']||[]).includes(p.id))) {
+    if (w.fields['Images']&&w.fields['Images'].length) return w.fields['Images'][0].thumbnails?.large?.url||w.fields['Images'][0].url;
+    if (w.fields['Image URLs']) { const u = w.fields['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) return u[0]; }
+  }
+  return null;
+}
+
+function filtered() {
   return db.projects.filter(p => {
-    const sn = seriesName(p);
-    if (activeSeries !== 'all' && sn !== activeSeries) return false;
+    if (activeSeries !== 'all' && sName(p) !== activeSeries) return false;
     if (searchQ) {
       const q = searchQ.toLowerCase();
-      const name = (p.fields['Name'] || '').toLowerCase();
-      const desc = (p.fields['Description'] || '').toLowerCase();
-      if (!name.includes(q) && !desc.includes(q)) return false;
+      if (!(p.fields['Name']||'').toLowerCase().includes(q) && !(p.fields['Description']||'').toLowerCase().includes(q)) return false;
     }
     return true;
   });
 }
 
-function projImage(proj) {
-  const pworks = db.works.filter(w => (w.fields['Project'] || []).includes(proj.id));
-  for (const w of pworks) {
-    if (w.fields['Images'] && w.fields['Images'].length) return w.fields['Images'][0].thumbnails?.large?.url || w.fields['Images'][0].url;
-    if (w.fields['Image URLs']) {
-      const urls = w.fields['Image URLs'].split('\n').map(u=>u.trim()).filter(Boolean);
-      if (urls.length) return urls[0];
-    }
-  }
-  return null;
-}
-
-function render() {
-  renderGrid();
-  renderList();
-}
+function render() { renderGrid(); renderList(); }
 
 function renderGrid() {
-  const grid = document.getElementById('projects-grid');
-  const projects = projectsFiltered();
-  grid.innerHTML = '';
-  if (!projects.length) { grid.innerHTML = '<div class="empty-state">No projects found</div>'; return; }
+  const root = document.getElementById('grid-view');
+  root.innerHTML = '';
+  const projs = filtered();
+  if (!projs.length) { root.innerHTML = '<div style="padding:60px 20px;text-align:center;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-4);">No projects found</div>'; return; }
 
   const order = ['Arts','Education','Cultural Work'];
-  const sorted = [...projects].sort((a,b) => {
-    const sa = seriesName(a), sb = seriesName(b);
-    const oa = order.indexOf(sa), ob = order.indexOf(sb);
-    if (oa !== ob) return oa - ob;
-    return (a.fields['Name']||'').localeCompare(b.fields['Name']||'');
+  const bySeries = {};
+  projs.forEach(p => { const s = sName(p)||'Other'; (bySeries[s]=bySeries[s]||[]).push(p); });
+
+  order.filter(s => bySeries[s]).forEach(s => {
+    const div = document.createElement('div');
+
+    const hd = document.createElement('div');
+    hd.className = 'series-divider';
+    const lbl = document.createElement('div'); lbl.className = 'series-divider-label'; lbl.textContent = s; hd.appendChild(lbl);
+    const ln = document.createElement('div'); ln.className = 'series-divider-line'; hd.appendChild(ln);
+    const cnt = document.createElement('div'); cnt.className = 'series-divider-count'; cnt.textContent = bySeries[s].length + (bySeries[s].length===1?' project':' projects'); hd.appendChild(cnt);
+    div.appendChild(hd);
+
+    const grid = document.createElement('div');
+    grid.className = 'proj-grid';
+    bySeries[s].sort((a,b)=>(a.fields['Name']||'').localeCompare(b.fields['Name']||'')).forEach(p => {
+      grid.appendChild(makeCard(p));
+    });
+    div.appendChild(grid);
+    root.appendChild(div);
   });
+}
 
-  sorted.forEach(p => {
-    const sn = seriesName(p);
-    const name = p.fields['Name'] || '';
-    const years = p.fields['Years Active'] || '';
-    const desc = p.fields['Description'] || '';
-    const img = projImage(p);
-    const grants = p.fields['Grant Context'] || [];
-    const residencies = p.fields['Residency Context'] || [];
-    const workCount = db.works.filter(w => (w.fields['Project']||[]).includes(p.id)).length;
-    const isActive = activeProject && activeProject.id === p.id;
+function makeCard(p) {
+  const s = sName(p);
+  const name = p.fields['Name']||'';
+  const img = projImg(p);
+  const wc = db.works.filter(w=>(w.fields['Project']||[]).includes(p.id)).length;
+  const grants = p.fields['Grant Context']||[];
+  const res = p.fields['Residency Context']||[];
+  const isActive = activeProject && activeProject.id === p.id;
+  const isSel = selIds.has(p.id);
 
-    const card = document.createElement('div');
-    card.className = 'proj-card' + (isActive ? ' active' : '');
+  const card = document.createElement('div');
+  card.className = 'proj-card' + (isActive?' active':'') + (isSel?' selected':'');
 
-    const imgDiv = document.createElement('div');
-    imgDiv.className = 'proj-card-img';
-    if (img) { const i = document.createElement('img'); i.src = img; i.loading = 'lazy'; i.alt = name; imgDiv.appendChild(i); }
-    else { const d = document.createElement('div'); d.className = 'proj-card-no-img'; d.textContent = name; imgDiv.appendChild(d); }
-    card.appendChild(imgDiv);
+  // Image
+  const imgDiv = document.createElement('div'); imgDiv.className = 'proj-card-img';
+  if (img) { const i = document.createElement('img'); i.src=img; i.loading='lazy'; imgDiv.appendChild(i); }
+  else { const d = document.createElement('div'); d.className='proj-card-no-img'; d.textContent=name; imgDiv.appendChild(d); }
 
-    const body = document.createElement('div');
-    body.className = 'proj-card-body';
+  // Check
+  const chk = document.createElement('div'); chk.className = 'proj-check';
+  imgDiv.appendChild(chk);
+  card.appendChild(imgDiv);
 
-    const seriesEl = document.createElement('div');
-    seriesEl.className = 'proj-card-series';
-    seriesEl.setAttribute('data-s', sn);
-    seriesEl.textContent = sn;
-    body.appendChild(seriesEl);
+  // Body
+  const body = document.createElement('div'); body.className = 'proj-card-body';
+  const se = document.createElement('div'); se.className='proj-card-series'; se.setAttribute('data-s',s); se.textContent=s; body.appendChild(se);
+  const ti = document.createElement('div'); ti.className='proj-card-title'; ti.textContent=name; body.appendChild(ti);
+  if (p.fields['Years Active']) { const y=document.createElement('div'); y.className='proj-card-years'; y.textContent=p.fields['Years Active']; body.appendChild(y); }
+  const tags = document.createElement('div'); tags.className='proj-card-tags';
+  if (wc) { const t=document.createElement('span'); t.className='proj-tag t-work'; t.textContent=wc+' work'+(wc!==1?'s':''); tags.appendChild(t); }
+  if (grants.length) { const t=document.createElement('span'); t.className='proj-tag t-grant'; t.textContent=grants[0]; tags.appendChild(t); }
+  if (res.length) { const t=document.createElement('span'); t.className='proj-tag t-res'; t.textContent=res[0]; tags.appendChild(t); }
+  body.appendChild(tags);
+  card.appendChild(body);
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'proj-card-title';
-    titleEl.textContent = name;
-    body.appendChild(titleEl);
-
-    if (years) { const y = document.createElement('div'); y.className = 'proj-card-years'; y.textContent = years; body.appendChild(y); }
-    if (desc) { const d = document.createElement('div'); d.className = 'proj-card-desc'; d.textContent = desc; body.appendChild(d); }
-
-    const footer = document.createElement('div');
-    footer.className = 'proj-card-footer';
-    if (workCount) { const t = document.createElement('span'); t.className = 'proj-tag has-works'; t.textContent = workCount + ' work' + (workCount!==1?'s':''); footer.appendChild(t); }
-    if (grants.length) { const t = document.createElement('span'); t.className = 'proj-tag has-grant'; t.textContent = grants[0]; footer.appendChild(t); }
-    if (residencies.length) { const t = document.createElement('span'); t.className = 'proj-tag has-residency'; t.textContent = residencies[0]; footer.appendChild(t); }
-    body.appendChild(footer);
-    card.appendChild(body);
-
-    card.addEventListener('click', (function(id){ return function(){ openProject(id); }; })(p.id));
-    grid.appendChild(card);
-  });
+  card.addEventListener('click', (function(id){ return function(e) {
+    if (selMode) { e.stopPropagation(); toggleSelId(id); }
+    else openProject(id);
+  }; })(p.id));
+  return card;
 }
 
 function renderList() {
-  const list = document.getElementById('projects-list');
-  list.innerHTML = '';
-  const projects = projectsFiltered();
+  const root = document.getElementById('list-view');
+  root.innerHTML = '';
+  const projs = filtered();
   const order = ['Arts','Education','Cultural Work'];
-  const byS = {};
-  projects.forEach(p => {
-    const sn = seriesName(p) || 'Other';
-    if (!byS[sn]) byS[sn] = [];
-    byS[sn].push(p);
-  });
+  const bySeries = {};
+  projs.forEach(p => { const s=sName(p)||'Other'; (bySeries[s]=bySeries[s]||[]).push(p); });
 
-  order.filter(s => byS[s]).forEach(sn => {
-    const section = document.createElement('div');
-    section.className = 'list-section';
-    const hdr = document.createElement('div');
-    hdr.className = 'list-section-title';
-    hdr.textContent = sn;
-    section.appendChild(hdr);
-
-    byS[sn].sort((a,b) => (a.fields['Name']||'').localeCompare(b.fields['Name']||'')).forEach(p => {
-      const wc = db.works.filter(w => (w.fields['Project']||[]).includes(p.id)).length;
-      const row = document.createElement('div');
-      row.className = 'list-row';
-      const t = document.createElement('div'); t.className = 'list-row-title'; t.textContent = p.fields['Name']||''; row.appendChild(t);
-      const y = document.createElement('div'); y.className = 'list-row-meta'; y.textContent = p.fields['Years Active']||'—'; row.appendChild(y);
-      const w = document.createElement('div'); w.className = 'list-row-meta'; w.textContent = wc ? wc+' works' : '—'; row.appendChild(w);
-      const s = document.createElement('div'); s.className = 'list-row-meta'; s.textContent = p.fields['Status']||'—'; row.appendChild(s);
-      row.addEventListener('click', (function(id){ return function(){ openProject(id); }; })(p.id));
-      section.appendChild(row);
+  order.filter(s=>bySeries[s]).forEach(s => {
+    const sec = document.createElement('div'); sec.className='list-section';
+    const hd = document.createElement('div'); hd.className='list-hd';
+    ['Project','Years','Works','Status'].forEach(t=>{ const d=document.createElement('div'); d.textContent=t; hd.appendChild(d); });
+    sec.appendChild(hd);
+    bySeries[s].sort((a,b)=>(a.fields['Name']||'').localeCompare(b.fields['Name']||'')).forEach(p=>{
+      const wc = db.works.filter(w=>(w.fields['Project']||[]).includes(p.id)).length;
+      const isActive = activeProject && activeProject.id===p.id;
+      const row = document.createElement('div'); row.className='list-row'+(isActive?' active':'');
+      const t=document.createElement('div'); t.className='list-title'; t.textContent=p.fields['Name']||''; row.appendChild(t);
+      const y=document.createElement('div'); y.className='list-meta'; y.textContent=p.fields['Years Active']||'—'; row.appendChild(y);
+      const w=document.createElement('div'); w.className='list-meta'; w.textContent=wc?wc+' works':'—'; row.appendChild(w);
+      const st=document.createElement('div'); st.className='list-meta'; st.textContent=p.fields['Status']||'—'; row.appendChild(st);
+      row.addEventListener('click',(function(id){return function(){openProject(id);};})(p.id));
+      sec.appendChild(row);
     });
-    list.appendChild(section);
+    root.appendChild(sec);
   });
 }
 
 function openProject(id) {
-  const proj = db.projects.find(p => p.id === id);
+  const proj = db.projects.find(p=>p.id===id);
   if (!proj) return;
   activeProject = proj;
+  render();
 
-  // Update active card
-  document.querySelectorAll('.proj-card').forEach(c => c.classList.remove('active'));
-  const cards = document.querySelectorAll('.proj-card');
-  cards.forEach(c => { if (c.onclick.toString().includes(id)) c.classList.add('active'); });
-
-  const sn = seriesName(proj);
   const f = proj.fields;
+  const s = sName(proj);
+  document.getElementById('d-series').textContent = s;
+  document.getElementById('d-series').setAttribute('data-s', s);
+  document.getElementById('d-title').textContent = f['Name']||'';
+  document.getElementById('d-years').textContent = f['Years Active']||'';
+  document.getElementById('d-desc').textContent = f['Description']||'';
 
-  document.getElementById('d-series').textContent = sn;
-  document.getElementById('d-series').setAttribute('data-s', sn);
-  document.getElementById('d-title').textContent = f['Name'] || '';
-  document.getElementById('d-years').textContent = f['Years Active'] || '';
-  document.getElementById('d-desc').textContent = f['Description'] || '';
-
-  // Tags
   const tagsEl = document.getElementById('d-tags');
-  const grants = f['Grant Context'] || [];
-  const residencies = f['Residency Context'] || [];
-  tagsEl.innerHTML = [
-    ...grants.map(g => `<span class="detail-tag detail-tag-grant">${g}</span>`),
-    ...residencies.map(r => `<span class="detail-tag detail-tag-residency">${r}</span>`)
-  ].join('');
+  tagsEl.innerHTML = '';
+  (f['Grant Context']||[]).forEach(g=>{ const t=document.createElement('span'); t.className='d-tag d-tag-grant'; t.textContent=g; tagsEl.appendChild(t); });
+  (f['Residency Context']||[]).forEach(r=>{ const t=document.createElement('span'); t.className='d-tag d-tag-res'; t.textContent=r; tagsEl.appendChild(t); });
 
-  // Build detail body
   const body = document.getElementById('detail-body');
-  // Works
-  const works = db.works.filter(w => (w.fields['Project']||[]).includes(id));
+  body.innerHTML = '';
+
+  // Works grid
+  const works = db.works.filter(w=>(w.fields['Project']||[]).includes(id));
   if (works.length) {
-    const sec = document.createElement('div');
-    sec.className = 'detail-section';
-    const hd = document.createElement('div');
-    hd.className = 'detail-section-hd';
-    hd.innerHTML = 'Works <span class="detail-count">' + works.length + '</span>';
+    const sec = document.createElement('div'); sec.className='d-section';
+    const hd = document.createElement('div'); hd.className='d-section-hd';
+    hd.innerHTML = 'Works <span class="d-count">'+works.length+'</span>';
     sec.appendChild(hd);
-    works.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(w => {
+    const grid = document.createElement('div'); grid.className='d-works-grid';
+    works.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(w=>{
       const wf = w.fields;
-      let img = '';
-      if (wf['Images'] && wf['Images'].length) img = wf['Images'][0].thumbnails && wf['Images'][0].thumbnails.small ? wf['Images'][0].thumbnails.small.url : wf['Images'][0].url;
-      else if (wf['Image URLs']) { const u = wf['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) img=u[0]; }
-      const row = document.createElement('div');
-      row.className = 'detail-work';
-      const thumb = document.createElement('div');
-      thumb.className = 'detail-work-thumb';
-      if (img) { const i = document.createElement('img'); i.src = img; i.loading = 'lazy'; thumb.appendChild(i); }
-      else { const d = document.createElement('div'); d.className = 'detail-work-no-img'; d.textContent = wf['Medium Category']||'work'; thumb.appendChild(d); }
-      const info = document.createElement('div');
-      info.className = 'detail-work-info';
-      const title = document.createElement('div'); title.className = 'detail-work-title'; title.textContent = wf['Title']||''; info.appendChild(title);
-      const meta = document.createElement('div'); meta.className = 'detail-work-meta'; meta.textContent = [wf['Medium Category'],wf['Year']].filter(Boolean).join(' · '); info.appendChild(meta);
-      row.appendChild(thumb); row.appendChild(info);
-      row.addEventListener('click', (function(wid){ return function(){ openWork(wid); }; })(w.id));
-      sec.appendChild(row);
+      let img='';
+      if (wf['Images']&&wf['Images'].length) img=wf['Images'][0].thumbnails?.small?.url||wf['Images'][0].url;
+      else if (wf['Image URLs']){ const u=wf['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length)img=u[0]; }
+      const card=document.createElement('div'); card.className='d-work';
+      const imgD=document.createElement('div'); imgD.className='d-work-img';
+      if(img){const i=document.createElement('img');i.src=img;i.loading='lazy';imgD.appendChild(i);}
+      const inf=document.createElement('div');inf.className='d-work-info';
+      const tt=document.createElement('div');tt.className='d-work-title';tt.textContent=wf['Title']||'';inf.appendChild(tt);
+      const mt=document.createElement('div');mt.className='d-work-meta';mt.textContent=[wf['Medium Category'],wf['Year']].filter(Boolean).join(' · ');inf.appendChild(mt);
+      card.appendChild(imgD); card.appendChild(inf);
+      card.addEventListener('click',(function(wid){return function(){openWork(wid);};})(w.id));
+      grid.appendChild(card);
     });
-    body.appendChild(sec);
+    sec.appendChild(grid); body.appendChild(sec);
   }
 
   // Programs
-  const progs = db.programs.filter(p => (p.fields['Project']||[]).includes(id));
-  if (progs.length) {
-    const sec = document.createElement('div'); sec.className = 'detail-section';
-    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Programs <span class="detail-count">' + progs.length + '</span>'; sec.appendChild(hd);
-    progs.forEach(p => {
-      const row = document.createElement('div'); row.className = 'detail-row';
-      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = p.fields['Year']||''; row.appendChild(lbl);
-      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = p.fields['Title']||'';
-      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = p.fields['Host / Venue']||''; val.appendChild(sub); row.appendChild(val);
-      sec.appendChild(row);
-    });
-    body.appendChild(sec);
-  }
+  const progs = db.programs.filter(p=>(p.fields['Project']||[]).includes(id));
+  if (progs.length) appendRows(body,'Programs',progs.map(p=>({yr:p.fields['Year']||'',val:p.fields['Title']||'',sub:p.fields['Host / Venue']||''})));
 
   // Exhibitions
-  const exhName = f['Name'] || '';
-  const exhMatch = db.exhibits.filter(e => (e.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
-  if (exhMatch.length) {
-    const sec = document.createElement('div'); sec.className = 'detail-section';
-    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Exhibitions <span class="detail-count">' + exhMatch.length + '</span>'; sec.appendChild(hd);
-    exhMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(e => {
-      const row = document.createElement('div'); row.className = 'detail-row';
-      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = e.fields['Year']||''; row.appendChild(lbl);
-      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = e.fields['Title']||'';
-      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = e.fields['Venue']||''; val.appendChild(sub); row.appendChild(val);
-      sec.appendChild(row);
-    });
-    body.appendChild(sec);
-  }
+  const nm = (f['Name']||'').toLowerCase();
+  const exhs = db.exhibits.filter(e=>(e.fields['Related Project']||'').toLowerCase().includes(nm));
+  if (exhs.length) appendRows(body,'Exhibitions',exhs.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).map(e=>({yr:e.fields['Year']||'',val:e.fields['Title']||'',sub:e.fields['Venue']||''})));
 
   // Press
-  const pressMatch = db.press.filter(p => (p.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
-  if (pressMatch.length) {
-    const sec = document.createElement('div'); sec.className = 'detail-section';
-    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Press <span class="detail-count">' + pressMatch.length + '</span>'; sec.appendChild(hd);
-    pressMatch.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).forEach(p => {
-      const row = document.createElement('div'); row.className = 'detail-row';
-      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = p.fields['Year']||''; row.appendChild(lbl);
-      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = p.fields['Title']||'';
-      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = p.fields['Publication']||''; val.appendChild(sub); row.appendChild(val);
-      sec.appendChild(row);
-    });
-    body.appendChild(sec);
-  }
+  const press = db.press.filter(p=>(p.fields['Related Project']||'').toLowerCase().includes(nm));
+  if (press.length) appendRows(body,'Press',press.sort((a,b)=>(b.fields['Year']||'').localeCompare(a.fields['Year']||'')).map(p=>({yr:p.fields['Year']||'',val:p.fields['Title']||'',sub:p.fields['Publication']||''})));
 
   // Talks
-  const talksMatch = db.talks.filter(t => (t.fields['Related Project']||'').toLowerCase().includes(exhName.toLowerCase()));
-  if (talksMatch.length) {
-    const sec = document.createElement('div'); sec.className = 'detail-section';
-    const hd = document.createElement('div'); hd.className = 'detail-section-hd'; hd.innerHTML = 'Talks <span class="detail-count">' + talksMatch.length + '</span>'; sec.appendChild(hd);
-    talksMatch.forEach(t => {
-      const row = document.createElement('div'); row.className = 'detail-row';
-      const lbl = document.createElement('div'); lbl.className = 'detail-row-label'; lbl.textContent = t.fields['Year']||''; row.appendChild(lbl);
-      const val = document.createElement('div'); val.className = 'detail-row-val'; val.textContent = t.fields['Title']||'';
-      const sub = document.createElement('div'); sub.className = 'detail-row-sub'; sub.textContent = (t.fields['Role']||'') + (t.fields['Host Institution'] ? ' · ' + t.fields['Host Institution'] : ''); val.appendChild(sub); row.appendChild(val);
-      sec.appendChild(row);
-    });
-    body.appendChild(sec);
-  }
+  const talks = db.talks.filter(t=>(t.fields['Related Project']||'').toLowerCase().includes(nm));
+  if (talks.length) appendRows(body,'Talks',talks.map(t=>({yr:t.fields['Year']||'',val:t.fields['Title']||'',sub:(t.fields['Role']||'')+(t.fields['Host Institution']?' · '+t.fields['Host Institution']:'')})));
 
-  if (!body.children.length) body.innerHTML = '<div class="empty-state" style="padding:32px 0;">No linked records yet</div>';
+  if (!body.children.length) body.innerHTML='<div style="padding:32px 28px;font-size:10px;color:var(--gray-4);letter-spacing:0.1em;text-transform:uppercase;">No linked records</div>';
   document.getElementById('detail-panel').classList.add('open');
+}
+
+function appendRows(parent, label, rows) {
+  const sec=document.createElement('div'); sec.className='d-section';
+  const hd=document.createElement('div'); hd.className='d-section-hd';
+  hd.innerHTML=label+' <span class="d-count">'+rows.length+'</span>';
+  sec.appendChild(hd);
+  rows.forEach(({yr,val,sub})=>{
+    const row=document.createElement('div'); row.className='d-row';
+    const y=document.createElement('div'); y.className='d-row-yr'; y.textContent=yr; row.appendChild(y);
+    const v=document.createElement('div'); v.className='d-row-val'; v.textContent=val;
+    if(sub){ const s=document.createElement('div'); s.className='d-row-sub'; s.textContent=sub; v.appendChild(s); }
+    row.appendChild(v); sec.appendChild(row);
+  });
+  parent.appendChild(sec);
 }
 
 function closeDetail() {
   document.getElementById('detail-panel').classList.remove('open');
   activeProject = null;
-  document.querySelectorAll('.proj-card').forEach(c => c.classList.remove('active'));
+  render();
 }
 
 function openWork(id) {
-  const w = db.works.find(x => x.id === id);
+  const w = db.works.find(x=>x.id===id);
   if (!w) return;
   const f = w.fields;
-  let img = '';
-  if (f['Images'] && f['Images'].length) img = f['Images'][0].url;
-  else if (f['Image URLs']) { const u = f['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) img=u[0]; }
-
-  document.getElementById('lb-title').textContent = f['Title']||'';
-  document.getElementById('lb-meta').textContent = [f['Medium'],f['Year'],f['Dimensions']].filter(Boolean).join(' · ');
-  const imgEl = document.getElementById('lightbox-img');
-  if (img) { imgEl.src = img; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
-
-  const body = document.getElementById('lightbox-body');
-  const fields = [
-    ['Series', (f['Series']||[]).map(sid => { const s = db.series.find(x=>x.id===sid); return s?.fields?.Name||''; }).join(', ')],
-    ['Medium', f['Medium']],
-    ['Year', f['Year']],
-    ['Dimensions', f['Dimensions']],
-    ['Edition', f['Edition']],
-    ['Statement', f['Statement']],
-    ['Collection', f['Collection Status']],
-  ].filter(([,v]) => v);
-
-  body.innerHTML = fields.map(([l,v]) => `<div class="lb-field">
-    <div class="lb-field-label">${l}</div>
-    <div class="lb-field-val">${v}</div>
-  </div>`).join('');
+  let img='';
+  if(f['Images']&&f['Images'].length) img=f['Images'][0].url;
+  else if(f['Image URLs']){const u=f['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean);if(u.length)img=u[0];}
+  document.getElementById('lb-title').textContent=f['Title']||'';
+  document.getElementById('lb-meta').textContent=[f['Medium'],f['Year'],f['Dimensions']].filter(Boolean).join(' · ');
+  const imgEl=document.getElementById('lb-img');
+  if(img){imgEl.src=img;imgEl.style.display='block';}else imgEl.style.display='none';
+  const body=document.getElementById('lb-body');
+  body.innerHTML='';
+  [['Medium',f['Medium']],['Year',f['Year']],['Dimensions',f['Dimensions']],['Edition',f['Edition']],['Statement',f['Statement']],['Collection',f['Collection Status']]].filter(([,v])=>v).forEach(([l,v])=>{
+    const row=document.createElement('div'); row.className='lb-row';
+    const lbl=document.createElement('div'); lbl.className='lb-label'; lbl.textContent=l; row.appendChild(lbl);
+    const val=document.createElement('div'); val.className='lb-val'; val.textContent=v; row.appendChild(val);
+    body.appendChild(row);
+  });
   document.getElementById('lightbox').classList.add('open');
 }
+function closeLB(){ document.getElementById('lightbox').classList.remove('open'); }
+document.getElementById('lightbox').addEventListener('click',e=>{if(e.target===document.getElementById('lightbox'))closeLB();});
 
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-document.getElementById('lightbox').addEventListener('click', e => { if (e.target === document.getElementById('lightbox')) closeLightbox(); });
-
-function filterSeries(s, btn) {
-  activeSeries = s;
-  document.querySelectorAll('.series-tab').forEach(t => t.classList.remove('active'));
+function filterSeries(s,btn) {
+  activeSeries=s;
+  document.querySelectorAll('.bar-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  if (activeProject) closeDetail();
-  render();
+  if(activeProject) closeDetail();
+  else render();
+}
+function handleSearch(){ searchQ=document.getElementById('search-input').value.trim(); render(); }
+function setView(v){
+  view=v;
+  document.getElementById('vbtn-grid').classList.toggle('active',v==='grid');
+  document.getElementById('vbtn-list').classList.toggle('active',v==='list');
+  document.getElementById('grid-view').classList.toggle('hidden',v!=='grid');
+  document.getElementById('list-view').classList.toggle('vis',v==='list');
 }
 
-function handleSearch() {
-  searchQ = document.getElementById('search-input').value.trim();
-  render();
+// Selection
+function toggleSelect(){
+  selMode=!selMode;
+  document.getElementById('sel-btn').classList.toggle('active',selMode);
+  document.getElementById('grid-panel').classList.toggle('select-mode',selMode);
+  if(!selMode){ clearSel(); } else render();
+}
+function toggleSelId(id){
+  if(selIds.has(id)) selIds.delete(id); else selIds.add(id);
+  updateSelBar(); render();
+}
+function clearSel(){ selIds.clear(); updateSelBar(); render(); }
+function updateSelBar(){
+  const bar=document.getElementById('sel-bar');
+  bar.classList.toggle('vis',selIds.size>0);
+  document.getElementById('sel-count').textContent=selIds.size+' selected';
 }
 
-function setView(v) {
-  currentView = v;
-  document.getElementById('vbtn-grid').classList.toggle('active', v==='grid');
-  document.getElementById('vbtn-list').classList.toggle('active', v==='list');
-  document.getElementById('projects-grid').classList.toggle('hidden', v!=='grid');
-  document.getElementById('projects-list').classList.toggle('visible', v==='list');
+// PDF
+function openPDF(){
+  document.getElementById('pdf-proj-name').textContent=activeProject?activeProject.fields['Name']||'none':'none';
+  document.getElementById('pdf-sel-n').textContent=selIds.size;
+  document.getElementById('pdf-panel').classList.add('open');
 }
-
-function clearSelection() { selectedIds.clear(); updateSelBar(); }
-function updateSelBar() {
-  const bar = document.getElementById('select-bar');
-  bar.classList.toggle('visible', selectedIds.size > 0);
-  document.getElementById('sel-count-label').textContent = `${selectedIds.size} selected`;
+function openPDFSel(){
+  document.querySelector('input[name="pdf-src"][value="selected"]').checked=true;
+  openPDF();
 }
-function generatePDF() { document.querySelector('input[name="pdf-src"][value="selected"]').checked = true; openPDFPanel(); }
+function closePDF(){ document.getElementById('pdf-panel').classList.remove('open'); }
+document.getElementById('pdf-panel').addEventListener('click',e=>{if(e.target===document.getElementById('pdf-panel'))closePDF();});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeLB();closePDF();} });
 
+function runPDF(){
+  const src=document.querySelector('input[name="pdf-src"]:checked').value;
+  const layout=document.getElementById('pdf-layout').value;
+  let works=[];
+  if(src==='all') works=[...db.works];
+  else if(src==='project'&&activeProject) works=db.works.filter(w=>(w.fields['Project']||[]).includes(activeProject.id));
+  else if(src==='selected') works=db.works.filter(w=>selIds.has(w.id));
+  if(!works.length){alert('No works to export.');return;}
+  closePDF();
 
-// ── PDF EXPORT ──
-function mkCatPage(cls) { const d = document.createElement('div'); d.className = 'cat-page ' + cls; return d; }
-
-function openPDFPanel() {
-  document.getElementById('pdf-sel-count').textContent = selectedIds.size;
-  document.getElementById('pdf-panel').style.display = 'flex';
-}
-function closePDFPanel() { document.getElementById('pdf-panel').style.display = 'none'; }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePDFPanel(); closeLightbox(); } });
-
-function runPDFExport() {
-  const src = document.querySelector('input[name="pdf-src"]:checked').value;
-  const layout = document.getElementById('pdf-layout').value;
-
-  let works = [];
-  if (src === 'all') {
-    works = db.works;
-  } else if (src === 'project' && activeProject) {
-    works = db.works.filter(w => (w.fields['Project']||[]).includes(activeProject.id));
-  } else if (src === 'selected') {
-    works = db.works.filter(w => selectedIds.has(w.id));
-  }
-
-  if (!works.length) { alert('No works to export.'); return; }
-  closePDFPanel();
-
-  const container = document.createElement('div');
-
-  if (layout === 'list') {
-    catListPages(works).forEach(pg => {
-      const wrap = document.createElement('div'); wrap.className = 'cat-page-wrap'; wrap.appendChild(pg); container.appendChild(wrap);
-    });
+  const container=document.createElement('div');
+  if(layout==='list'){
+    listPages(works).forEach(pg=>{ const wrap=document.createElement('div');wrap.className='cat-page-wrap';wrap.appendChild(pg);container.appendChild(wrap); });
   } else {
     // Group by project
-    const projsSeen = new Set();
-    works.forEach(w => { (w.fields['Project']||[]).forEach(pid => projsSeen.add(pid)); });
-    const projs = [...projsSeen].map(pid => db.projects.find(p => p.id === pid)).filter(Boolean);
-
-    projs.forEach(proj => {
-      const pw = works.filter(w => (w.fields['Project']||[]).includes(proj.id));
-      if (!pw.length) return;
-      // Project intro page
-      const intro = mkCatPage('p-series');
-      const sn = seriesName(proj);
-      intro.innerHTML = `<div class="cat-inner" style="justify-content:flex-end;padding-bottom:10%;">
-        <div style="font-size:8px;color:#bbb;margin-bottom:0.4em;font-family:'futura-pt',sans-serif;">${sn} · ${proj.fields['Years Active']||''}</div>
-        <div style="font-family:'futura-pt-condensed',sans-serif;font-size:48px;text-transform:uppercase;letter-spacing:0.03em;color:#111;line-height:1.0;margin-bottom:5%;">${proj.fields['Name']||''}</div>
-        <div style="font-family:'futura-pt',sans-serif;font-size:8px;line-height:1.85;color:#444;max-width:80%;">${proj.fields['Description']||''}</div>
-      </div>`;
-      const iw = document.createElement('div'); iw.className = 'cat-page-wrap'; iw.appendChild(intro); container.appendChild(iw);
-      pw.forEach((w, i) => {
-        const pg = catWorkPage(w, i+1, pw.length);
-        const ww = document.createElement('div'); ww.className = 'cat-page-wrap'; ww.appendChild(pg); container.appendChild(ww);
-      });
+    const projsSeen=[...new Set(works.flatMap(w=>w.fields['Project']||[]))];
+    projsSeen.forEach(pid=>{
+      const proj=db.projects.find(p=>p.id===pid);
+      const pw=works.filter(w=>(w.fields['Project']||[]).includes(pid));
+      if(!pw.length) return;
+      if(proj){
+        const intro=mkPage('p-intro');
+        const sn=sName(proj);
+        intro.innerHTML=`<div style="position:absolute;inset:0;padding:8% 9%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10%;">
+          <div style="font-size:8px;color:#bbb;margin-bottom:0.5em;font-family:'futura-pt',sans-serif;letter-spacing:0.14em;text-transform:uppercase;">${sn} · ${proj.fields['Years Active']||''}</div>
+          <div style="font-family:'futura-pt-condensed',sans-serif;font-size:52px;text-transform:uppercase;letter-spacing:0.03em;color:#111;line-height:1.0;margin-bottom:5%;">${proj.fields['Name']||''}</div>
+          <div style="font-family:'futura-pt',sans-serif;font-size:8px;line-height:1.9;color:#555;max-width:76%;">${proj.fields['Description']||''}</div>
+        </div>`;
+        const iw=document.createElement('div');iw.className='cat-page-wrap';iw.appendChild(intro);container.appendChild(iw);
+      }
+      pw.forEach((w,i)=>{ const pg=workPage(w,i+1,pw.length); const ww=document.createElement('div');ww.className='cat-page-wrap';ww.appendChild(pg);container.appendChild(ww); });
     });
     // Works with no project
-    const noproj = works.filter(w => !(w.fields['Project']||[]).length);
-    noproj.forEach((w, i) => {
-      const pg = catWorkPage(w, i+1, noproj.length);
-      const ww = document.createElement('div'); ww.className = 'cat-page-wrap'; ww.appendChild(pg); container.appendChild(ww);
-    });
+    works.filter(w=>!(w.fields['Project']||[]).length).forEach((w,i,a)=>{ const pg=workPage(w,i+1,a.length); const ww=document.createElement('div');ww.className='cat-page-wrap';ww.appendChild(pg);container.appendChild(ww); });
   }
 
-  const win = window.open('', '_blank');
-  win.document.write(buildPrintDoc(container.innerHTML));
+  const win=window.open('','_blank');
+  win.document.write(printDoc(container.innerHTML));
   win.document.close();
-  setTimeout(() => win.print(), 900);
+  setTimeout(()=>win.print(),900);
 }
 
-function catWorkPage(w, n, total) {
-  const f = w.fields;
-  const pg = mkCatPage('p-work');
-  let img = '';
-  if (f['Images'] && f['Images'].length) img = f['Images'][0].url;
-  else if (f['Image URLs']) { const u = f['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean); if(u.length) img=u[0]; }
-  const proj = f['Project'] && f['Project'].length ? (db.projects.find(p => p.id === f['Project'][0]) || null) : null;
-  const projName = proj ? proj.fields['Name'] || '' : '';
-  const meta = [f['Medium'], f['Dimensions'], f['Edition']].filter(Boolean);
-  pg.innerHTML = `<div class="cat-inner" style="padding:5% 7%;">
+function mkPage(cls){ const d=document.createElement('div'); d.className='cat-page '+cls; return d; }
+
+function workPage(w,n,total){
+  const f=w.fields; const pg=mkPage('p-work');
+  let img='';
+  if(f['Images']&&f['Images'].length) img=f['Images'][0].url;
+  else if(f['Image URLs']){const u=f['Image URLs'].split('\n').map(x=>x.trim()).filter(Boolean);if(u.length)img=u[0];}
+  const proj=f['Project']&&f['Project'].length?(db.projects.find(p=>p.id===f['Project'][0])||null):null;
+  const pName=proj?proj.fields['Name']||'':'';
+  const meta=[f['Medium'],f['Dimensions'],f['Edition']].filter(Boolean);
+  pg.innerHTML=`<div style="position:absolute;inset:0;padding:5% 7%;display:flex;flex-direction:column;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3.5%;">
       <div>
         <div style="font-size:7.5px;font-style:italic;color:#111;font-family:'futura-pt',sans-serif;line-height:1.4;">Miguel<br>Limón</div>
-        ${projName?`<div style="font-size:6px;color:#bbb;margin-top:3px;font-family:'futura-pt',sans-serif;">${projName}</div>`:''}
+        ${pName?`<div style="font-size:6px;color:#bbb;margin-top:3px;font-family:'futura-pt',sans-serif;">${pName}</div>`:''}
       </div>
-      <div style="text-align:right;font-family:'futura-pt',sans-serif;font-size:7px;line-height:1.65;color:#666;">
-        <span style="font-family:'futura-pt-condensed',sans-serif;color:#111;font-size:9px;display:block;margin-bottom:1px;text-transform:uppercase;letter-spacing:0.03em;">${f['Title']||''}</span>
+      <div style="text-align:right;font-family:'futura-pt',sans-serif;font-size:7px;line-height:1.7;color:#666;">
+        <span style="font-family:'futura-pt-condensed',sans-serif;color:#111;font-size:9px;display:block;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:1px;">${f['Title']||''}</span>
         ${meta.map(m=>`<div>${m}</div>`).join('')}
         ${f['Year']?`<div>${f['Year']}</div>`:''}
       </div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-      ${img ? `<img src="${img}" style="max-width:90%;max-height:90%;object-fit:contain;filter:grayscale(100%);">` : `<div style="width:55%;aspect-ratio:4/3;background:#f0ece5;display:flex;align-items:center;justify-content:center;font-size:7px;color:#ccc;border:0.5px dashed #ddd;">no image</div>`}
+      ${img?`<img src="${img}" style="max-width:90%;max-height:90%;object-fit:contain;filter:grayscale(100%);">`:`<div style="width:55%;aspect-ratio:4/3;background:#f0ece5;display:flex;align-items:center;justify-content:center;font-size:7px;color:#ccc;border:0.5px dashed #ddd;">no image</div>`}
     </div>
-    ${f['Statement']?`<div style="margin-top:2.5%;font-size:7px;line-height:1.8;color:#666;max-width:74%;">${(f['Statement']||'').substring(0,260)}</div>`:''}
+    ${f['Statement']?`<div style="margin-top:2.5%;font-size:7px;line-height:1.85;color:#666;max-width:74%;">${(f['Statement']||'').substring(0,260)}</div>`:''}
   </div>
   <span class="cat-folio">${n} / ${total}</span>`;
   return pg;
 }
 
-function catListPages(works) {
-  const ROWS = 36;
-  const pages = [];
-  for (let i = 0; i < works.length; i += ROWS) {
-    const chunk = works.slice(i, i+ROWS);
-    const pg = mkCatPage('p-list');
-    const rows = chunk.map(w => {
-      const f = w.fields;
-      const proj = f['Project'] && f['Project'].length ? (db.projects.find(p => p.id === f['Project'][0]) || null) : null;
-      const projName = proj ? proj.fields['Name']||'' : '';
-      const status = f['Collection Status'] || '';
+function listPages(works){
+  const ROWS=36; const pages=[];
+  for(let i=0;i<works.length;i+=ROWS){
+    const chunk=works.slice(i,i+ROWS);
+    const pg=mkPage('p-list');
+    const rows=chunk.map(w=>{
+      const f=w.fields;
+      const proj=f['Project']&&f['Project'].length?(db.projects.find(p=>p.id===f['Project'][0])||null):null;
       return `<div style="display:grid;grid-template-columns:1fr 110px 70px 80px;gap:0 14px;border-bottom:0.5px solid #eee;padding:5px 0;font-size:8px;line-height:1.4;">
-        <div><div style="font-family:'futura-pt-condensed',sans-serif;text-transform:uppercase;letter-spacing:0.02em;color:#111;">${f['Title']||''}</div>${projName?`<div style="color:#999;font-size:6.5px;">${projName}</div>`:''}</div>
-        <div style="color:#666;">${f['Medium Category']||''}</div>
-        <div style="color:#666;">${f['Year']||''}</div>
-        <div style="color:#666;">${status}</div>
+        <div>
+          <div style="font-family:'futura-pt-condensed',sans-serif;text-transform:uppercase;letter-spacing:0.02em;color:#111;">${f['Title']||''}</div>
+          ${proj?`<div style="color:#999;font-size:6.5px;">${proj.fields['Name']||''}</div>`:''}
+        </div>
+        <div style="color:#666;font-family:'futura-pt',sans-serif;">${f['Medium Category']||''}</div>
+        <div style="color:#666;font-family:'futura-pt',sans-serif;">${f['Year']||''}</div>
+        <div style="color:#666;font-family:'futura-pt',sans-serif;">${f['Collection Status']||''}</div>
       </div>`;
     }).join('');
-    pg.innerHTML = `<div class="cat-inner" style="padding:6% 8%;">
+    pg.innerHTML=`<div style="position:absolute;inset:0;padding:6% 8%;">
       <div style="display:grid;grid-template-columns:1fr 110px 70px 80px;gap:0 14px;border-bottom:0.5px solid #ccc;padding-bottom:6px;margin-bottom:2px;font-family:'futura-pt-condensed',sans-serif;font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:#999;">
         <span>Title</span><span>Medium</span><span>Year</span><span>Status</span>
-      </div>
-      ${rows}
+      </div>${rows}
     </div>
-    <span class="cat-folio">${i+1}–${Math.min(i+ROWS, works.length)} of ${works.length}</span>`;
+    <span class="cat-folio">${i+1}–${Math.min(i+ROWS,works.length)} of ${works.length}</span>`;
     pages.push(pg);
   }
   return pages;
 }
 
-function buildPrintDoc(pagesHtml) {
+function printDoc(body){
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>Miguel Limón — Archive</title>
   <link rel="stylesheet" href="https://use.typekit.net/rdj2lxf.css">
@@ -1031,12 +891,9 @@ function buildPrintDoc(pagesHtml) {
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#fff;}
     @page{size:8.5in 11in;margin:0;}
-    .cat-page{width:8.5in;height:11in;background:#fff;position:relative;overflow:hidden;page-break-after:always;break-after:page;display:flex;flex-direction:column;}
-    .cat-inner{position:absolute;inset:0;padding:8% 9%;display:flex;flex-direction:column;}
-    .p-work .cat-inner{padding:5% 7%;}
-    .cat-folio{position:absolute;bottom:4%;right:7%;font-size:7px;color:#bbb;letter-spacing:0.04em;font-family:'futura-pt',sans-serif;}
-    .p-list .cat-inner{padding:6% 8%;}
-  </style></head><body>${pagesHtml}</body></html>`;
+    .cat-page{width:8.5in;height:11in;background:#fff;position:relative;overflow:hidden;page-break-after:always;break-after:page;}
+    .cat-folio{position:absolute;bottom:4%;right:7%;font-size:7px;color:#bbb;letter-spacing:0.06em;font-family:'futura-pt',sans-serif;}
+  </style></head><body>${body}</body></html>`;
 }
 
 init();
